@@ -342,7 +342,7 @@ class Exp_Main_Test(Exp_Basic):
                     #             names_norm.append(f"{n_m}.{n_p}")
 
                 # model_optim = optim.Adam(params, lr=self.args.learning_rate*10 / (2**self.test_train_num))  # 使用Adam优化器
-                lr = self.args.learning_rate * 2000
+                lr = self.args.learning_rate * self.args.adapted_lr_times
                 # model_optim = optim.Adam(params, lr=self.args.learning_rate/30)  # 使用Adam优化器
                 # model_optim_norm = optim.Adam(params_norm, lr=self.args.learning_rate*1000 / (2**self.test_train_num))  # 使用Adam优化器
 

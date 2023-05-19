@@ -31,6 +31,7 @@ python -u run.py \
  --itr 1 \
   --gpu $gpu \
   --test_train_num $test_train_num \
-  > logs/$model_name'_'M_Exchange_predlen_$preLen'_'seqlen_96_labellen_48_ttn_$test_train_num.log
+  --run_train --run_test
+#   > logs/$model_name'_'M_Exchange_predlen_$preLen'_'seqlen_96_labellen_48_ttn_$test_train_num.log
 
 done

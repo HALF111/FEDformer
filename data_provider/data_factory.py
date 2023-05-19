@@ -68,7 +68,8 @@ def data_provider_at_test_time(args, flag):
 
         # 注意：因为我们要做TTT/TTA，所以一定要把batch_size设置成1 ！！！
         # batch_size = 32
-        batch_size = 1
+        # batch_size = 1
+        batch_size = args.adapted_batch_size
         # batch_size = 4
         # batch_size = 2857
 

@@ -93,7 +93,11 @@ def main():
 
     # test_train_num
     parser.add_argument('--test_train_num', type=int, default=1, help='how many samples to be trained during test')
-
+    parser.add_argument('--adapted_lr_times', type=float, default=1, help='the times of lr during adapted')  # adaptation时的lr是原来的lr的几倍？
+    parser.add_argument('--adapted_batch_size', type=int, default=32, help='the batch_size for adaptation use')  # adaptation时的数据集取的batch_size设置为多大
+    parser.add_argument('--test_train_epochs', type=int, default=1, help='the batch_size for adaptation use')  # adaptation时的数据集取的batch_size设置为多大
+    parser.add_argument('--run_train', action='store_true')
+    parser.add_argument('--run_test', action='store_true')
 
     args = parser.parse_args()
 
@@ -116,7 +120,7 @@ def main():
 
             # setting record of experiments
             # 别忘记加上test_train_num一项！！！
-            setting = '{}_{}_{}_modes{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_ttn{}_{}_{}'.format(
+            setting = '{}_{}_{}_modes{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}'.format(
                 args.task_id,
                 args.model,
                 args.mode_select,
@@ -134,17 +138,19 @@ def main():
                 args.factor,
                 args.embed,
                 args.distil,
-                args.test_train_num,
+                # args.test_train_num,
                 args.des,
                 ii)
 
             exp = Exp(args)  # set experiments
-            # print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
-            # exp.train(setting)
+            if args.run_train:
+                print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
+                exp.train(setting)
 
-            print('>>>>>>>normal testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-            # exp.test(setting, flag="test")
-            exp.test(setting, test=1, flag="test")
+            if args.run_test:
+                print('>>>>>>>normal testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+                # exp.test(setting, flag="test")
+                exp.test(setting, test=1, flag="test")
 
             # print('>>>>>>>normal testing but batch_size is 1 : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
             # # exp.test(setting, flag="test_with_batchsize_1")
