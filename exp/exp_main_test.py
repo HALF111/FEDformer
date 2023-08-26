@@ -1,18 +1,28 @@
-import os
-import time
-import warnings
-import numpy as np
-import torch
-import torch.nn as nn
-from torch import optim
 from data_provider.data_factory import data_provider
 from data_provider.data_factory import data_provider_at_test_time
 from exp.exp_basic import Exp_Basic
 from models import FEDformer, Autoformer, Informer, Transformer
+from models.etsformer import ETSformer
+from models.crossformer import Crossformer
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
 
+# ETSformer
+from utils.Adam import Adam
+
+import numpy as np
+import matplotlib.pyplot as plt
+import torch
+import torch.nn as nn
+from torch import optim
+
+import os
+import time
+import warnings
+
+
 import copy
+import math
 
 
 warnings.filterwarnings('ignore')
@@ -25,6 +35,7 @@ class Exp_Main_Test(Exp_Basic):
         # 这个可以作为超参数来设置
         self.test_train_num = self.args.test_train_num
 
+        # 判断哪些channels是有周期性的
         data_path = self.args.data_path
         if "ETTh1" in data_path: selected_channels = [1,3]  # [1,3, 2,4,5,6]
         # if "ETTh1" in data_path: selected_channels = [7]
@@ -43,6 +54,19 @@ class Exp_Main_Test(Exp_Basic):
         
         self.selected_channels = selected_channels
 
+        # 判断各个数据集的周期是多久
+        if "ETTh1" in data_path: period = 24
+        elif "ETTh2" in data_path: period = 24
+        elif "ETTm1" in data_path: period = 96
+        elif "ETTm2" in data_path: period = 96
+        elif "electricity" in data_path: period = 24
+        elif "traffic" in data_path: period = 24
+        elif "illness" in data_path: period = 52.142857
+        elif "weather" in data_path: period = 144
+        elif "Exchange" in data_path: period = 1
+        else: period = 1
+        self.period = period
+
 
     def _build_model(self):
         model_dict = {
@@ -50,8 +74,28 @@ class Exp_Main_Test(Exp_Basic):
             'Autoformer': Autoformer,
             'Transformer': Transformer,
             'Informer': Informer,
+            'ETSformer': ETSformer,
+            'Crossformer': Crossformer,
         }
-        model = model_dict[self.args.model].Model(self.args).float()
+        
+        if self.args.model == 'Crossformer':
+            model = Crossformer.Model(
+                self.args.enc_in, 
+                self.args.seq_len, 
+                self.args.pred_len,
+                self.args.seg_len,
+                self.args.win_size,
+                self.args.cross_factor,
+                self.args.d_model, 
+                self.args.d_ff,
+                self.args.n_heads, 
+                self.args.e_layers,
+                self.args.dropout, 
+                self.args.baseline,
+                self.device
+            ).float()
+        else:
+            model = model_dict[self.args.model].Model(self.args).float()
 
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
@@ -60,7 +104,7 @@ class Exp_Main_Test(Exp_Basic):
     def _get_data(self, flag):
         data_set, data_loader = data_provider(self.args, flag)
         return data_set, data_loader
-    
+
 
     # 别忘了这里要加一个用data_provider_at_test_time来提供的data
     def _get_data_at_test_time(self, flag):
@@ -69,7 +113,35 @@ class Exp_Main_Test(Exp_Basic):
 
 
     def _select_optimizer(self):
-        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
+        if self.args.model == 'ETSformer':
+            if 'warmup' in self.args.lradj: lr = self.args.min_lr
+            else: lr = self.args.learning_rate
+
+            if self.args.smoothing_learning_rate > 0: smoothing_lr = self.args.smoothing_learning_rate
+            else: smoothing_lr = 100 * self.args.learning_rate
+
+            if self.args.damping_learning_rate > 0: damping_lr = self.args.damping_learning_rate
+            else: damping_lr = 100 * self.args.learning_rate
+
+            nn_params = []
+            smoothing_params = []
+            damping_params = []
+            for k, v in self.model.named_parameters():
+                if k[-len('_smoothing_weight'):] == '_smoothing_weight':
+                    smoothing_params.append(v)
+                elif k[-len('_damping_factor'):] == '_damping_factor':
+                    damping_params.append(v)
+                else:
+                    nn_params.append(v)
+
+            model_optim = Adam([
+                {'params': nn_params, 'lr': lr, 'name': 'nn'},
+                {'params': smoothing_params, 'lr': smoothing_lr, 'name': 'smoothing'},
+                {'params': damping_params, 'lr': damping_lr, 'name': 'damping'},
+            ])
+        else:
+            model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
+
         return model_optim
 
     def _select_criterion(self):
@@ -91,18 +163,23 @@ class Exp_Main_Test(Exp_Basic):
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
                 # encoder - decoder
-                if self.args.use_amp:
-                    with torch.cuda.amp.autocast():
+                if self.args.model == 'Crossformer':
+                    outputs = self.model(batch_x)
+                else:
+                    if self.args.use_amp:
+                        with torch.cuda.amp.autocast():
+                            if self.args.output_attention:
+                                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                            else:
+                                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                    else:
                         if self.args.output_attention:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                         else:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-                else:
-                    if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                    else:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                 f_dim = -1 if self.args.features == 'MS' else 0
+                # ? 是否需要对outputs取出最后一段？
+                outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
 
                 pred = outputs.detach().cpu()
@@ -111,7 +188,7 @@ class Exp_Main_Test(Exp_Basic):
                 loss = criterion(pred, true)
 
                 total_loss.append(loss)
-        
+
         total_loss = np.average(total_loss)
         self.model.train()
 
@@ -157,28 +234,28 @@ class Exp_Main_Test(Exp_Basic):
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
 
                 # encoder - decoder
-                if self.args.use_amp:
-                    with torch.cuda.amp.autocast():
+                if self.args.model == 'Crossformer':
+                    outputs = self.model(batch_x)
+                else:
+                    if self.args.use_amp:
+                        with torch.cuda.amp.autocast():
+                            if self.args.output_attention:
+                                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                            else:
+                                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                    else:
                         if self.args.output_attention:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                         else:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
-                        f_dim = -1 if self.args.features == 'MS' else 0
-                        batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
-                        loss = criterion(outputs, batch_y)
-                        train_loss.append(loss.item())
-                else:
-                    if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                    else:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-
-                    f_dim = -1 if self.args.features == 'MS' else 0
-                    batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
-
-                    loss = criterion(outputs, batch_y)
-                    train_loss.append(loss.item())
+                f_dim = -1 if self.args.features == 'MS' else 0
+                # ? 是否需要对outputs取出最后一段？
+                outputs = outputs[:, -self.args.pred_len:, f_dim:]
+                batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                
+                loss = criterion(outputs, batch_y)
+                train_loss.append(loss.item())
 
                 if (i + 1) % 100 == 0:
                     print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
@@ -194,6 +271,7 @@ class Exp_Main_Test(Exp_Basic):
                     scaler.update()
                 else:
                     loss.backward()
+                    if self.args.model == 'ETSformer': torch.nn.utils.clip_grad_norm(self.model.parameters(), 1.0)
                     model_optim.step()
 
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
@@ -213,7 +291,7 @@ class Exp_Main_Test(Exp_Basic):
             adjust_learning_rate(model_optim, epoch + 1, self.args)
 
         best_model_path = path + '/' + 'checkpoint.pth'
-
+        
         # 这里为了防止异常，需要做一些修改，要在torch.load后加上map_location='cuda:0'
         # self.model.load_state_dict(torch.load(best_model_path))
         self.model.load_state_dict(torch.load(best_model_path, map_location='cuda:0'))
@@ -252,22 +330,26 @@ class Exp_Main_Test(Exp_Basic):
                 # decoder input
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
+                
                 # encoder - decoder
-                if self.args.use_amp:
-                    with torch.cuda.amp.autocast():
+                if self.args.model == 'Crossformer':
+                    outputs = self.model(batch_x)
+                else:
+                    if self.args.use_amp:
+                        with torch.cuda.amp.autocast():
+                            if self.args.output_attention:
+                                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                            else:
+                                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                    else:
                         if self.args.output_attention:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                         else:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-                else:
-                    if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-
-                    else:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
-
+                # ? 是否需要对outputs取出最后一段？
+                outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
 
                 # selected_channels = self.selected_channels
@@ -289,11 +371,19 @@ class Exp_Main_Test(Exp_Basic):
 
                 preds.append(pred)
                 trues.append(true)
+
                 if i % 20 == 0:
                     input = batch_x.detach().cpu().numpy()
                     gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
                     pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
                     visual(gt, pd, os.path.join(folder_path, str(i) + '.pdf'))
+        
+        # file_name = f"batchsize_32_{setting}" if flag == 'test' else f"batchsize_1_{setting}"
+        # # 将adaptation前的loss、adaptation中逐样本做adapt后的loss、以及adaptation之后的loss做统计
+        # with open(f"./loss_before_and_after_adapt/{file_name}.txt", "w") as f:
+        #     for loss in loss_list:
+        #         f.write(f"{loss}\n")
+
 
         preds = np.array(preds)
         trues = np.array(trues)
@@ -324,12 +414,14 @@ class Exp_Main_Test(Exp_Basic):
 
         print(f"Test - cost time: {time.time() - test_time_start}s")
 
-        return
+        # return
+        return loss_list
 
 
-    
+
     def select_with_distance(self, setting, test=0, is_training_part_params=True, use_adapted_model=True, test_train_epochs=1, weights_given=None, adapted_degree="small", weights_from="test"):
         test_data, test_loader = self._get_data_at_test_time(flag='test')
+        data_len = len(test_data)
         if test:
             print('loading model from checkpoint !!!')
             self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth'), map_location='cuda:0'))
@@ -367,10 +459,14 @@ class Exp_Main_Test(Exp_Basic):
 
         # self.model.eval()
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(test_loader):
+            if data_len - i < self.args.batch_size: break
+            # if data_len - i < data_len % self.args.batch_size: break
+            
             # 从self.model拷贝下来cur_model，并设置为train模式
             # self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth'), map_location='cuda:0'))
             cur_model = copy.deepcopy(self.model)
-            cur_model.train()
+            # cur_model.train()
+            cur_model.eval()
 
             if is_training_part_params:
                 params = []
@@ -378,11 +474,20 @@ class Exp_Main_Test(Exp_Basic):
                 params_norm = []
                 names_norm = []
                 cur_model.requires_grad_(False)
+                # print(cur_model)
                 for n_m, m in cur_model.named_modules():
+                    # print(n_m)
                     # 注意：这里的名字应当根据Autoformer模型而修改为"decoder.projection"
+                    if self.args.model == 'ETSformer':
+                        linear_layer_name = "decoder.pred"
+                    elif self.args.model == 'Crossformer':
+                        # 因为decoder一共有e_layers+1层，所以其最后一层是{self.args.e_layers}
+                        linear_layer_name = f"decoder.decode_layers.{self.args.e_layers}.linear_pred"
+                        # linear_layer_name = "decoder.decode_layers.3.linear_pred"
+                    else:
+                        linear_layer_name = "decoder.projection"
                     
-                    # if "decoder.projection" == n_m:
-                    if "decoder.projection" in n_m:
+                    if linear_layer_name in n_m:
                         m.requires_grad_(True)
                         for n_p, p in m.named_parameters():
                             if n_p in ['weight', 'bias']:  # weight is scale, bias is shift
@@ -405,7 +510,7 @@ class Exp_Main_Test(Exp_Basic):
             
 
             # tmp loss
-            cur_model.eval()
+            # cur_model.eval()
             seq_len = self.args.seq_len
             pred_len = self.args.pred_len
             adapt_start_pos = self.args.adapt_start_pos
@@ -423,9 +528,7 @@ class Exp_Main_Test(Exp_Basic):
             # 获取adaptation之前的loss
             loss_before_adapt = criterion(pred, true)
             a1.append(loss_before_adapt.item())
-            # print(f"loss_before_adapt: {loss_before_adapt}")
-            # print(f'mse:{tmp_loss}')
-            cur_model.train()
+            # cur_model.train()
             
 
             # 先用原模型的预测值和标签值之间的error，做反向传播之后得到的梯度值gradient_0
@@ -487,6 +590,20 @@ class Exp_Main_Test(Exp_Basic):
             
             distance_pairs = []
             for ii in range(self.args.test_train_num):
+                # 只对周期性样本计算x之间的距离
+                if self.args.adapt_cycle:
+                    # 为了计算当前的样本和测试样本间时间差是否是周期的倍数
+                    # 我们先计算时间差与周期相除的余数
+                    if 'illness' in self.args.data_path:
+                        cycle_remainer = math.fmod(self.args.test_train_num-1 + self.args.pred_len - ii, self.period)
+                    cycle_remainer = (self.args.test_train_num-1 + self.args.pred_len - ii) % self.period
+                    # 定义判定的阈值
+                    threshold = self.period // 12
+                    # 如果余数在[-threshold, threshold]之间，那么考虑使用其做fine-tune
+                    # 否则的话不将其纳入计算距离的数据范围内
+                    if cycle_remainer > threshold or cycle_remainer < -threshold:
+                        continue
+                    
                 if self.args.adapt_part_channels:
                     lookback_x = batch_x[:, ii : ii+seq_len, self.selected_channels].reshape(-1)
                 else:
@@ -629,8 +746,17 @@ class Exp_Main_Test(Exp_Basic):
                 b_grad[unselected_channels] = 0
 
             # 注意：这里是减去梯度，而不是加上梯度！！！！！
-            cur_model.decoder.projection.weight = Parameter(cur_model.decoder.projection.weight - w_grad * cur_lr)
-            cur_model.decoder.projection.bias = Parameter(cur_model.decoder.projection.bias - b_grad * cur_lr)
+            if self.args.model == 'ETSformer':
+                cur_model.decoder.pred.weight = Parameter(cur_model.decoder.pred.weight - w_grad * cur_lr)
+                cur_model.decoder.pred.bias = Parameter(cur_model.decoder.pred.bias - b_grad * cur_lr)
+            elif self.args.model == 'Crossformer':
+                # 因为decoder一共有e_layers+1层，所以其最后一层是{self.args.e_layers}
+                adapt_layer = cur_model.decoder.decode_layers[self.args.e_layers].linear_pred
+                adapt_layer.weight = Parameter(adapt_layer.weight - w_grad * cur_lr)
+                adapt_layer.bias = Parameter(adapt_layer.bias - b_grad * cur_lr)
+            else:
+                cur_model.decoder.projection.weight = Parameter(cur_model.decoder.projection.weight - w_grad * cur_lr)
+                cur_model.decoder.projection.bias = Parameter(cur_model.decoder.projection.bias - b_grad * cur_lr)
 
 
 
@@ -661,7 +787,6 @@ class Exp_Main_Test(Exp_Basic):
 
 
             cur_model.eval()
-
 
             seq_len = self.args.seq_len
             pred_len = self.args.pred_len
@@ -709,7 +834,7 @@ class Exp_Main_Test(Exp_Basic):
                 error_per_pred_index[index].append(cur_error)
 
 
-            if (i+1) % 100 == 0:
+            if (i+1) % 100 == 0 or (data_len - i) < 100 and (i+1) % 10 == 0:
                 print("\titers: {0}, cost time: {1}s".format(i + 1, time.time() - test_time_start))
                 print(gradients)
                 tmp_p = np.array(preds); tmp_p = tmp_p.reshape(-1, tmp_p.shape[-2], tmp_p.shape[-1])
@@ -728,7 +853,8 @@ class Exp_Main_Test(Exp_Basic):
                 print("last one:", a1[-1], a2[-1], a3[-1], a4[-1], all_angels[-1])
 
                 printed_selected_channels = [item+1 for item in self.selected_channels]
-                print(f"adapt_part_channels: {self.args.adapt_part_channels}, selected_channels: {printed_selected_channels}")
+                print(f"adapt_part_channels: {self.args.adapt_part_channels}, and adapt_cycle: {self.args.adapt_cycle}")
+                print(f"first 25th selected_channels: {printed_selected_channels[:25]}")
                 print(f"selected_distance_pairs are: {selected_distance_pairs}")
 
 
@@ -850,7 +976,16 @@ class Exp_Main_Test(Exp_Basic):
                 cur_model.requires_grad_(False)
                 for n_m, m in cur_model.named_modules():
                     # 注意：这里的名字应当根据FEDformer模型而修改为"decoder.projection"
-                    if "decoder.projection" == n_m:
+                    if self.args.model == 'ETSformer':
+                        linear_layer_name = "decoder.pred"
+                    elif self.args.model == 'Crossformer':
+                        # 因为decoder一共有e_layers+1层，所以其最后一层是{self.args.e_layers}
+                        linear_layer_name = f"decoder.decode_layers.{self.args.e_layers}.linear_pred"
+                        # linear_layer_name = "decoder.decode_layers.3.linear_pred"
+                    else:
+                        linear_layer_name = "decoder.projection"
+                    
+                    if linear_layer_name in n_m:
                         m.requires_grad_(True)
                         for n_p, p in m.named_parameters():
                             if n_p in ['weight', 'bias']:  # weight is scale, bias is shift
@@ -1045,17 +1180,20 @@ class Exp_Main_Test(Exp_Basic):
         dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
 
         # encoder - decoder
-        if self.args.use_amp:
-            with torch.cuda.amp.autocast():
+        if self.args.model == 'Crossformer':
+            outputs = model(batch_x)
+        else:
+            if self.args.use_amp:
+                with torch.cuda.amp.autocast():
+                    if self.args.output_attention:
+                        outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                    else:
+                        outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+            else:
                 if self.args.output_attention:
                     outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                 else:
-                    outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-        else:
-            if self.args.output_attention:
-                outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-            else:
-                outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)  # 这里返回的结果为[B, L, D]，例如[32, 24, 12]
+                    outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)  # 这里返回的结果为[B, L, D]，例如[32, 24, 12]
         
         # if self.args.inverse:
         #     outputs = dataset_object.inverse_transform(outputs)
@@ -1091,17 +1229,20 @@ class Exp_Main_Test(Exp_Basic):
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
                 # encoder - decoder
-                if self.args.use_amp:
-                    with torch.cuda.amp.autocast():
+                if self.args.model == 'Crossformer':
+                    outputs = self.model(batch_x)
+                else:
+                    if self.args.use_amp:
+                        with torch.cuda.amp.autocast():
+                            if self.args.output_attention:
+                                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                            else:
+                                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                    else:
                         if self.args.output_attention:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                         else:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-                else:
-                    if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                    else:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                 pred = outputs.detach().cpu().numpy()  # .squeeze()
                 preds.append(pred)
 

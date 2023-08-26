@@ -22,17 +22,6 @@ def main():
     parser.add_argument('--model', type=str, default='FEDformer',
                         help='model name, options: [FEDformer, Autoformer, Informer, Transformer]')
 
-    # supplementary config for FEDformer model
-    parser.add_argument('--version', type=str, default='Fourier',
-                        help='for FEDformer, there are two versions to choose, options: [Fourier, Wavelets]')
-    parser.add_argument('--mode_select', type=str, default='random',
-                        help='for FEDformer, there are two mode selection method, options: [random, low]')
-    parser.add_argument('--modes', type=int, default=64, help='modes to be selected random 64')
-    parser.add_argument('--L', type=int, default=3, help='ignore level')
-    parser.add_argument('--base', type=str, default='legendre', help='mwt base')
-    parser.add_argument('--cross_activation', type=str, default='tanh',
-                        help='mwt cross atention activation function tanh or softmax')
-
     # data loader
     parser.add_argument('--data', type=str, default='ETTh1', help='dataset type')
     parser.add_argument('--root_path', type=str, default='./dataset/ETT/', help='root path of the data file')
@@ -57,7 +46,9 @@ def main():
     parser.add_argument('--dec_in', type=int, default=7, help='decoder input size')
     parser.add_argument('--c_out', type=int, default=7, help='output size')
     parser.add_argument('--d_model', type=int, default=512, help='dimension of model')
+    # n_heads = 4 for Crossformer
     parser.add_argument('--n_heads', type=int, default=8, help='num of heads')
+    # e_layers == 3 for Crossformer
     parser.add_argument('--e_layers', type=int, default=2, help='num of encoder layers')
     parser.add_argument('--d_layers', type=int, default=1, help='num of decoder layers')
     parser.add_argument('--d_ff', type=int, default=2048, help='dimension of fcn')
@@ -66,22 +57,52 @@ def main():
     parser.add_argument('--distil', action='store_false',
                         help='whether to use distilling in encoder, using this argument means not using distilling',
                         default=True)
+    # dropout == 0.2 for ETSformer & Crossformer
     parser.add_argument('--dropout', type=float, default=0.05, help='dropout')
     parser.add_argument('--embed', type=str, default='timeF',
                         help='time features encoding, options:[timeF, fixed, learned]')
+    # activation == 'sigmoid' for ETSformer
     parser.add_argument('--activation', type=str, default='gelu', help='activation')
-    parser.add_argument('--output_attention', action='store_true', help='whether to output attention in ecoder')
+    parser.add_argument('--output_attention', action='store_true', help='whether to output attention in encoder')
     parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
+    
+    # Reformer & Autoformer
+    parser.add_argument('--bucket_size', type=int, default=4, help='for Reformer')
+    parser.add_argument('--n_hashes', type=int, default=4, help='for Reformer')
+    # FEDformer
+    parser.add_argument('--version', type=str, default='Fourier',
+                        help='for FEDformer, there are two versions to choose, options: [Fourier, Wavelets]')
+    parser.add_argument('--mode_select', type=str, default='random',
+                        help='for FEDformer, there are two mode selection method, options: [random, low]')
+    parser.add_argument('--modes', type=int, default=64, help='modes to be selected random 64')
+    parser.add_argument('--L', type=int, default=3, help='ignore level')
+    parser.add_argument('--base', type=str, default='legendre', help='mwt base')
+    parser.add_argument('--cross_activation', type=str, default='tanh',
+                        help='mwt cross atention activation function tanh or softmax')
+    # ETSformer
+    parser.add_argument('--K', type=int, default=1, help='Top-K Fourier bases')
+    parser.add_argument('--min_lr', type=float, default=1e-30)
+    parser.add_argument('--warmup_epochs', type=int, default=3)
+    parser.add_argument('--std', type=float, default=0.2)
+    parser.add_argument('--smoothing_learning_rate', type=float, default=0, help='optimizer learning rate')
+    parser.add_argument('--damping_learning_rate', type=float, default=0, help='optimizer learning rate')
+    parser.add_argument('--optim', type=str, default='adam', help='optimizer')
+    # Crossformer
+    parser.add_argument('--seg_len', type=int, default=6, help='segment length (L_seg)')
+    parser.add_argument('--win_size', type=int, default=2, help='window size for segment merge')
+    parser.add_argument('--cross_factor', type=int, default=10, help='num of routers in Cross-Dimension Stage of TSA (c)')
+    parser.add_argument('--baseline', action='store_true', help='whether to use mean of past series as baseline for prediction', default=False)
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
-    parser.add_argument('--itr', type=int, default=3, help='experiments times')
-    parser.add_argument('--train_epochs', type=int, default=10, help='train epochs')
+    parser.add_argument('--itr', type=int, default=1, help='experiments times')
+    parser.add_argument('--train_epochs', type=int, default=20, help='train epochs')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size of train input data')
-    parser.add_argument('--patience', type=int, default=3, help='early stopping patience')
+    parser.add_argument('--patience', type=int, default=5, help='early stopping patience')
     parser.add_argument('--learning_rate', type=float, default=0.0001, help='optimizer learning rate')
     parser.add_argument('--des', type=str, default='test', help='exp description')
     parser.add_argument('--loss', type=str, default='mse', help='loss function')
+    # lradj == 'exponential_with_warmup' for ETSformer
     parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')
     parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
 
@@ -92,9 +113,9 @@ def main():
     parser.add_argument('--devices', type=str, default='0,1', help='device ids of multi gpus')
 
     # test_train_num
-    parser.add_argument('--test_train_num', type=int, default=1, help='how many samples to be trained during test')
+    parser.add_argument('--test_train_num', type=int, default=10, help='how many samples to be trained during test')
     parser.add_argument('--adapted_lr_times', type=float, default=1, help='the times of lr during adapted')  # adaptation时的lr是原来的lr的几倍？
-    parser.add_argument('--adapted_batch_size', type=int, default=32, help='the batch_size for adaptation use')  # adaptation时的数据集取的batch_size设置为多大
+    parser.add_argument('--adapted_batch_size', type=int, default=1, help='the batch_size for adaptation use')  # adaptation时的数据集取的batch_size设置为多大
     parser.add_argument('--test_train_epochs', type=int, default=1, help='the batch_size for adaptation use')  # adaptation时的数据集取的batch_size设置为多大
     parser.add_argument('--run_train', action='store_true')
     parser.add_argument('--run_test', action='store_true')
@@ -107,7 +128,13 @@ def main():
     # selected_data_num表示从过去test_train_num个样本中按照距离挑选出最小的多少个出来
     # 因此这里要求必须有lookback_data_num <= test_train_num成立
     parser.add_argument('--selected_data_num', type=int, default=10)
-    parser.add_argument('--adapt_part_channels', action='store_true')
+
+    parser.add_argument('--get_grads_from', type=str, default="test", help="options:[test, val]")
+    parser.add_argument('--adapted_degree', type=str, default="small", help="options:[small, large]")
+
+    # 解析解用的参数alpha和lambda
+    parser.add_argument('--lambda_reg', type=int, default=1)
+    parser.add_argument('--alpha', type=int, default=1)
 
     # 改用更近（填0）或更远（周期性）的数据做adaptation
     parser.add_argument('--use_nearest_data', action='store_true')
@@ -118,6 +145,18 @@ def main():
     # 2.当use_further_data时，要求保证adapt_start_pos严格大于等于pred_len
     parser.add_argument('--adapt_start_pos', type=int, default=1)
 
+    parser.add_argument('--run_calc_acf', action='store_true')
+    parser.add_argument('--acf_lag', type=int, default=1)
+    parser.add_argument('--run_calc_kldiv', action='store_true')
+    parser.add_argument('--get_data_error', action='store_true')
+
+    parser.add_argument('--adapt_part_channels', action='store_true')
+    # 仅对周期性数据做fine-tuning
+    parser.add_argument('--adapt_cycle', action='store_true')
+
+    # KNN
+    parser.add_argument('--feature_dim', type=int, default=50)
+    parser.add_argument('--k_value', type=int, default=10)
 
     args = parser.parse_args()
 
@@ -137,6 +176,7 @@ def main():
 
     if args.is_training:
         for ii in range(args.itr):
+            print(f"-------Start iteration {ii+1}--------------------------")
 
             # setting record of experiments
             # 别忘记加上test_train_num一项！！！
@@ -180,15 +220,78 @@ def main():
             if args.run_adapt:
                 # # 对整个模型进行fine-tuning
                 # print('>>>>>>>my testing with all parameters trained : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-                # exp.my_test(setting, is_training_part_params=False, use_adapted_model=True, test_train_epochs=3)
+                # exp.my_test(setting, test=1, is_training_part_params=False, use_adapted_model=True, test_train_epochs=args.test_train_epochs)
+
 
                 # 只对最后的全连接层projection层进行fine-tuning
                 print('>>>>>>>my testing with test-time training : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
                 # exp.my_test(setting, is_training_part_params=True, use_adapted_model=True, test_train_epochs=1)
-                exp.my_test(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=1)
+                exp.my_test(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs)
 
                 # exp.my_test_mp(setting, is_training_part_params=True, use_adapted_model=True, test_train_epochs=1)
 
+            if args.run_calc:
+                print('>>>>>>>run_calc test with test-time training : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+
+                #获取梯度
+                weight_path = "./grads_npy/" + setting
+                if args.get_grads_from == "test":
+                    weight_file = f"{weight_path}/weights_{args.get_grads_from}_{args.adapted_degree}_ttn{args.test_train_num}.txt"
+                elif args.get_grads_from == "val":
+                    weight_file = f"{weight_path}/weights_{args.get_grads_from}_{args.adapted_degree}_ttn{args.test_train_num}.txt"
+
+                if os.path.exists(weight_file):
+                    with open(weight_file) as f:
+                        weights_str = f.readline()
+                        weights_str_list = weights_str.split(',')
+                        weights = [float(weight) for weight in weights_str_list]
+                    print(weights)
+                else:
+                    weights = None
+
+                mse, mae = exp.calc_test(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs, weights_given=weights)
+
+                # 存储mse和mae结果，便于读取
+                result_dir = "./mse_and_mae_results"
+                dataset_name = args.data_path.replace(".csv", "")
+                file_name = f"{dataset_name}_pl{args.pred_len}_alpha{int(args.alpha)}_ttn{args.test_train_num}_lambda{int(args.lambda_reg)}.txt"
+
+                if not os.path.exists(result_dir):
+                    os.makedirs(result_dir)
+                file_path = os.path.join(result_dir, file_name)
+                with open(file_path, "w") as f:
+                    f.write(f"{mse}, {mae}")
+            
+            if args.run_select_with_distance:
+                # 只对最后的全连接层projection层进行fine-tuning
+                print('>>>>>>>my testing with test-time training : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+                exp.select_with_distance(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs)
+
+            if args.run_get_grads:
+                print('>>>>>>>get grads : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+                if args.get_grads_from == "test":  # 在test数据集上做
+                    exp.get_grads(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs, flag="test", adapted_degree=args.adapted_degree)
+                elif args.get_grads_from == "val":  # 在val数据集上做
+                    exp.get_grads(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs, flag="val", adapted_degree=args.adapted_degree)
+
+            if args.run_get_lookback_data:
+                print('>>>>>>>get look-back data : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+                exp.get_lookback_data(setting)
+
+            if args.run_calc_acf:
+                # 记得一定一定一定要加上"--batch_size 1"！！！
+                print('>>>>>>>calc ACF with lag={} : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(args.acf_lag, setting))
+                exp.calc_acf(setting, lag=args.acf_lag)
+            
+            if args.run_calc_kldiv:
+                # 记得一定一定一定要加上"--batch_size 1"！！！
+                print('>>>>>>>calc KLdiv between train/val/test{} : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(args.acf_lag, setting))
+                exp.calc_KLdiv(setting)
+            
+            if args.get_data_error:
+                # 记得一定一定一定要加上"--batch_size 1"！！！
+                print('>>>>>>>get_data_error of train/val/test{} : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(args.acf_lag, setting))
+                exp.get_data_error(setting=setting)
 
             # print('>>>>>>>my testing but with original model : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
             # exp.my_test(setting, is_training_part_params=True, use_adapted_model=False)
