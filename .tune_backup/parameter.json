@@ -1,0 +1,22 @@
+{
+  "adapt_lr_level": [
+    "INTEGER",
+    "0"
+  ],
+  "model": [
+    "TEXT",
+    "Autoformer"
+  ],
+  "dataset": [
+    "TEXT",
+    "ETTh1"
+  ],
+  "pred_len": [
+    "INTEGER",
+    "96"
+  ],
+  "gpu": [
+    "INTEGER",
+    "0"
+  ]
+}

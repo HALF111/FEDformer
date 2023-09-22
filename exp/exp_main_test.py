@@ -178,7 +178,7 @@ class Exp_Main_Test(Exp_Basic):
                         else:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                 f_dim = -1 if self.args.features == 'MS' else 0
-                # ? 是否需要对outputs取出最后一段？
+                # ? 是否需要对outputs取出最后一段[-self.args.pred_len:]？
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
 
@@ -459,8 +459,8 @@ class Exp_Main_Test(Exp_Basic):
 
         # self.model.eval()
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(test_loader):
-            if data_len - i < self.args.batch_size: break
-            # if data_len - i < data_len % self.args.batch_size: break
+            # if data_len - i < self.args.batch_size: break
+            if data_len - i < data_len % self.args.batch_size: break
             
             # 从self.model拷贝下来cur_model，并设置为train模式
             # self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth'), map_location='cuda:0'))
@@ -595,8 +595,10 @@ class Exp_Main_Test(Exp_Basic):
                     # 为了计算当前的样本和测试样本间时间差是否是周期的倍数
                     # 我们先计算时间差与周期相除的余数
                     if 'illness' in self.args.data_path:
+                        import math
                         cycle_remainer = math.fmod(self.args.test_train_num-1 + self.args.pred_len - ii, self.period)
-                    cycle_remainer = (self.args.test_train_num-1 + self.args.pred_len - ii) % self.period
+                    else:
+                        cycle_remainer = (self.args.test_train_num-1 + self.args.pred_len - ii) % self.period
                     # 定义判定的阈值
                     threshold = self.period // 12
                     # 如果余数在[-threshold, threshold]之间，那么考虑使用其做fine-tune
@@ -930,13 +932,112 @@ class Exp_Main_Test(Exp_Basic):
         else:
             distance_file = f"{distance_dir}/distances_allones_select{self.args.selected_data_num}_ttn{self.test_train_num}_lr{self.args.adapted_lr_times:.2f}.txt"
 
-        with open(distance_file, "w") as f:
-            for i in range(len(a1)):
-                for ii in range(len(all_distances[i])):
-                    f.write(f"{all_distances[i][ii]}, ")
-                f.write(f"{a1[i]}, {a3[i]}" + "\n")
+        # with open(distance_file, "w") as f:
+        #     for i in range(len(a1)):
+        #         for ii in range(len(all_distances[i])):
+        #             f.write(f"{all_distances[i][ii]}, ")
+        #         f.write(f"{a1[i]}, {a3[i]}" + "\n")
 
-        return a1, a2, a3
+        # return a1, a2, a3
+        return mse, mae
+
+
+    def run_KNN(self, setting, test=0):
+        print('loading model from checkpoint !!!')
+        # self.model.load_state_dict(torch.load(os.paths.join('./checkpoints/' + setting, 'checkpoint.pth'), map_location='cuda:0'))
+        
+        assert self.args.batch_size == 1
+        assert self.args.k_value > 0
+        
+        preds, trues = [], []
+        batch_x_list, batch_y_list = [], []
+        test_time_start = time.time()
+
+        for flag in ["train_without_shuffle", "val_without_shuffle"]:
+            cur_data, cur_loader = self._get_data(flag=flag)
+            
+            # self.model.eval()
+            # with torch.no_grad():
+            for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(cur_loader):
+                batch_x = batch_x[0, :, :].float().to(self.device)
+                batch_y = batch_y[0, -self.args.pred_len:, :].float().to(self.device)
+                batch_x_list.append(batch_x)
+                batch_y_list.append(batch_y)
+        
+        
+        for flag in ["test"]:
+            cur_data, cur_loader = self._get_data(flag=flag)
+            
+            for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(cur_loader):
+                batch_x = batch_x[0, :, :].float().to(self.device)
+                batch_y = batch_y[0, -self.args.pred_len:, :].float().to(self.device)
+                test_x, test_y = batch_x, batch_y
+
+            
+                import torch.nn.functional as F
+                
+                distance_pairs = []
+                data_len = len(batch_x_list)
+                # 由于我们实际上只能看到相隔为pred_len以上的数据，所以这里要将data_len减去self.args.pred_len
+                if i < self.args.pred_len: 
+                    data_len = data_len - i
+                else:
+                    data_len = data_len - self.args.pred_len
+                
+                for ii in range(data_len):
+                    lookback_x = batch_x_list[ii]
+                    dist = F.pairwise_distance(test_x.reshape(1, -1), lookback_x.reshape(1, -1), p=2).item()
+                    distance_pairs.append([ii, dist])
+
+                # 先按距离从小到大排序
+                cmp = lambda item: item[1]
+                distance_pairs.sort(key=cmp)
+
+                # 筛选出其中最小的k_value个样本出来
+                selected_distance_pairs = distance_pairs[:self.args.k_value]
+                selected_indices = [item[0] for item in selected_distance_pairs]
+                selected_distances = [item[1] for item in selected_distance_pairs]
+                # print(f"selected_distance_pairs is: {selected_distance_pairs}")
+
+                pred = 0
+                for index in selected_indices:
+                    pred = pred + batch_y_list[index]
+                pred = pred / len(selected_indices)
+                true = batch_y
+                
+                pred = pred.detach().cpu().numpy()
+                true = true.detach().cpu().numpy()
+                preds.append(pred)
+                trues.append(true)
+            
+                mae, mse, rmse, mape, mspe = metric(pred, true)
+                
+                # 将新样本插入进去
+                batch_x_list.append(batch_x)
+                batch_y_list.append(batch_y)
+                
+                if i % 100 == 0:
+                    print(f"data {i} have been calculated, cost time: {time.time() - test_time_start}s")
+                    print(f"current sample: mse:{mse}, mae:{mae}")
+                    tmp_preds = np.array(preds)
+                    tmp_preds = tmp_preds.reshape(-1, tmp_preds.shape[-2], tmp_preds.shape[-1])
+                    tmp_trues = np.array(trues)
+                    tmp_trues = tmp_trues.reshape(-1, tmp_trues.shape[-2], tmp_trues.shape[-1])
+                    tmp_mae, tmp_mse, *_ = metric(tmp_preds, tmp_trues)
+                    print(f"overall mse:{tmp_mse}, mae:{tmp_mae}")
+            
+        preds = np.array(preds)
+        trues = np.array(trues)
+        print('test shape:', preds.shape, trues.shape)
+
+        preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
+        trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
+        print('test shape:', preds.shape, trues.shape)
+
+        mae, mse, rmse, mape, mspe = metric(preds, trues)
+        print('mse:{}, mae:{}'.format(mse, mae))
+        
+        return
 
 
 
@@ -966,7 +1067,8 @@ class Exp_Main_Test(Exp_Basic):
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(test_loader):
             # 从self.model拷贝下来cur_model，并设置为train模式
             cur_model = copy.deepcopy(self.model)
-            cur_model.train()
+            # cur_model.train()
+            cur_model.eval()
 
             if is_training_part_params:
                 params = []

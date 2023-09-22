@@ -93,6 +93,6 @@ cur_path=./$dir_name/$model'_'$name'_'pl$pred_len
 if [ ! -d $cur_path ]; then
     mkdir $cur_path
 fi
-python -u run.py --root_path ./dataset/illness/ --data_path national_illness.csv --model $model --data custom --features M --seq_len 336 --pred_len 60 --e_layers 2 --d_layers 2 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --K 1 --learning_rate 1e-3 --itr 1 --gpu $gpu_num \
+python -u run.py --root_path ./dataset/illness/ --data_path national_illness.csv --model $model --data custom --features M --seq_len 60 --pred_len $pred_len --e_layers 2 --d_layers 2 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --K 1 --learning_rate 1e-3 --itr 1 --gpu $gpu_num \
     --d_model 512 --is_training 1 --task_id ili --lradj exponential_with_warmup --dropout 0.2 --label_len 0 --activation 'sigmoid' --run_train --run_test  > $cur_path'/'train_and_test_loss.log
 done

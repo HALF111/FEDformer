@@ -1,0 +1,13 @@
+# best_result.yml
+target:
+  - min: mse
+  - mae
+find_best:
+  - adapt_lr_level
+group_by:
+  - dataset
+  - pred_len
+  - model
+  # - adapt_lr_level
+ignore:
+  - gpu

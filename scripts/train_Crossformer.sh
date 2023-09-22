@@ -195,7 +195,7 @@ if [ ! -d $cur_path ]; then
     mkdir $cur_path
 fi
 python -u run.py --root_path ./dataset/electricity/ --data_path electricity.csv --model Crossformer --data custom --features M --seq_len $seq_len --pred_len $pred_len --enc_in 321 --dec_in 321 --c_out 321 --des 'Exp' --learning_rate $lr --itr 1 --gpu $gpu_num \
-    --is_training 1 --lradj fixed --seg_len $seg_len --d_model 64 --d_ff 128 --e_layers 3 --n_heads 2 --task_id ECL --dropout 0.2 --test_train_num 10 --run_train --run_test  > $cur_path'/'train_and_test_loss.log
+    --is_training 1 --seg_len $seg_len --d_model 64 --d_ff 128 --e_layers 3 --n_heads 2 --task_id ECL --dropout 0.2 --test_train_num 10 --run_train --run_test  > $cur_path'/'train_and_test_loss.log
 
 # 5.2 ECL + 192
 seq_len=720; pred_len=192
@@ -205,7 +205,7 @@ if [ ! -d $cur_path ]; then
     mkdir $cur_path
 fi
 python -u run.py --root_path ./dataset/electricity/ --data_path electricity.csv --model Crossformer --data custom --features M --seq_len $seq_len --pred_len $pred_len --enc_in 321 --dec_in 321 --c_out 321 --des 'Exp' --learning_rate $lr --itr 1 --gpu $gpu_num \
-    --is_training 1 --lradj fixed --seg_len $seg_len --d_model 64 --d_ff 128 --e_layers 3 --n_heads 2 --task_id ECL --dropout 0.2 --test_train_num 10 --run_train --run_test  > $cur_path'/'train_and_test_loss.log
+    --is_training 1 --seg_len $seg_len --d_model 64 --d_ff 128 --e_layers 3 --n_heads 2 --task_id ECL --dropout 0.2 --test_train_num 10 --run_train --run_test  > $cur_path'/'train_and_test_loss.log
 
 # 5.3 ECL + 336
 seq_len=720; pred_len=336
@@ -215,7 +215,7 @@ if [ ! -d $cur_path ]; then
     mkdir $cur_path
 fi
 python -u run.py --root_path ./dataset/electricity/ --data_path electricity.csv --model Crossformer --data custom --features M --seq_len $seq_len --pred_len $pred_len --enc_in 321 --dec_in 321 --c_out 321 --des 'Exp' --learning_rate $lr --itr 1 --gpu $gpu_num \
-    --is_training 1 --lradj fixed --seg_len $seg_len --d_model 64 --d_ff 128 --e_layers 3 --n_heads 2 --task_id ECL --dropout 0.2 --test_train_num 10 --run_train --run_test  > $cur_path'/'train_and_test_loss.log
+    --is_training 1 --seg_len $seg_len --d_model 64 --d_ff 128 --e_layers 3 --n_heads 2 --task_id ECL --dropout 0.2 --test_train_num 10 --run_train --run_test  > $cur_path'/'train_and_test_loss.log
 
 # 5.4 ECL + 720
 seq_len=720; pred_len=720
@@ -225,7 +225,7 @@ if [ ! -d $cur_path ]; then
     mkdir $cur_path
 fi
 python -u run.py --root_path ./dataset/electricity/ --data_path electricity.csv --model Crossformer --data custom --features M --seq_len $seq_len --pred_len $pred_len --enc_in 321 --dec_in 321 --c_out 321 --des 'Exp' --learning_rate $lr --itr 1 --gpu $gpu_num \
-    --is_training 1 --lradj fixed --seg_len $seg_len --d_model 64 --d_ff 128 --e_layers 3 --n_heads 2 --task_id ECL --dropout 0.2 --test_train_num 10 --run_train --run_test  > $cur_path'/'train_and_test_loss.log
+    --is_training 1 --seg_len $seg_len --d_model 64 --d_ff 128 --e_layers 3 --n_heads 2 --task_id ECL --dropout 0.2 --test_train_num 10 --run_train --run_test  > $cur_path'/'train_and_test_loss.log
 
 
 

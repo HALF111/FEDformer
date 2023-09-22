@@ -155,6 +155,7 @@ def main():
     parser.add_argument('--adapt_cycle', action='store_true')
 
     # KNN
+    parser.add_argument('--run_knn', action='store_true')
     parser.add_argument('--feature_dim', type=int, default=50)
     parser.add_argument('--k_value', type=int, default=10)
 
@@ -265,7 +266,18 @@ def main():
             if args.run_select_with_distance:
                 # 只对最后的全连接层projection层进行fine-tuning
                 print('>>>>>>>my testing with test-time training : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-                exp.select_with_distance(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs)
+                mse, mae = exp.select_with_distance(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs)
+                
+                # 存储mse和mae结果，便于读取
+                result_dir = "./mse_and_mae_results"
+                dataset_name = args.data_path.replace(".csv", "")
+                file_name = f"{args.model}_{dataset_name}_pl{args.pred_len}_ttn{args.test_train_num}_select{args.selected_data_num}_lr{args.adapted_lr_times:.2f}.txt"
+
+                if not os.path.exists(result_dir):
+                    os.makedirs(result_dir)
+                file_path = os.path.join(result_dir, file_name)
+                with open(file_path, "w") as f:
+                    f.write(f"{mse}, {mae}")
 
             if args.run_get_grads:
                 print('>>>>>>>get grads : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
@@ -290,8 +302,13 @@ def main():
             
             if args.get_data_error:
                 # 记得一定一定一定要加上"--batch_size 1"！！！
-                print('>>>>>>>get_data_error of train/val/test{} : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(args.acf_lag, setting))
+                print('>>>>>>>get_data_error of train/val/test: {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
                 exp.get_data_error(setting=setting)
+            
+            if args.run_knn:
+                # 记得一定一定一定要加上"--batch_size 1"！！！
+                print('>>>>>>>run_knn for test{}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+                exp.run_KNN(setting=setting)
 
             # print('>>>>>>>my testing but with original model : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
             # exp.my_test(setting, is_training_part_params=True, use_adapted_model=False)
