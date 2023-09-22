@@ -64,6 +64,7 @@ class Exp_Main_Test(Exp_Basic):
         elif "illness" in data_path: period = 52.142857
         elif "weather" in data_path: period = 144
         elif "Exchange" in data_path: period = 1
+        elif "WTH_informer" in data_path: period = 24
         else: period = 1
         self.period = period
 
@@ -588,46 +589,73 @@ class Exp_Main_Test(Exp_Basic):
             else:
                 test_x = batch_x[:, -seq_len:, :].reshape(-1)
             
+            
             distance_pairs = []
-            for ii in range(self.args.test_train_num):
-                # 只对周期性样本计算x之间的距离
-                if self.args.adapt_cycle:
-                    # 为了计算当前的样本和测试样本间时间差是否是周期的倍数
-                    # 我们先计算时间差与周期相除的余数
-                    if 'illness' in self.args.data_path:
-                        import math
-                        cycle_remainer = math.fmod(self.args.test_train_num-1 + self.args.pred_len - ii, self.period)
+            
+            if self.args.remove_nearest:
+                for ii in range(self.test_train_num):
+                    if self.args.adapt_part_channels:
+                        lookback_x = batch_x[:, ii : ii+seq_len, self.selected_channels].reshape(-1)
                     else:
-                        cycle_remainer = (self.args.test_train_num-1 + self.args.pred_len - ii) % self.period
-                    # 定义判定的阈值
-                    threshold = self.period // 12
-                    # 如果余数在[-threshold, threshold]之间，那么考虑使用其做fine-tune
-                    # 否则的话不将其纳入计算距离的数据范围内
-                    if cycle_remainer > threshold or cycle_remainer < -threshold:
-                        continue
+                        lookback_x = batch_x[:, ii : ii+seq_len, :].reshape(-1)
+                    dist = F.pairwise_distance(test_x, lookback_x, p=2).item()
+                    distance_pairs.append([ii, dist])
+                # 从其中随机筛选出selected_data_num个样本
+                import random
+                selected_distance_pairs = random.sample(distance_pairs, self.args.selected_data_num)
+            else:
+                for ii in range(self.args.test_train_num):
+                    # 只对周期性样本计算x之间的距离
+                    # if self.args.adapt_cycle:
                     
-                if self.args.adapt_part_channels:
-                    lookback_x = batch_x[:, ii : ii+seq_len, self.selected_channels].reshape(-1)
+                    # PS：这里注释掉了adapt_cycle，相当于默认是加的；
+                    # 现在改用remove_cycle，如果加了才说明掉周期性；不加则保留
+                    if not self.args.remove_cycle:
+                        # 为了计算当前的样本和测试样本间时间差是否是周期的倍数
+                        # 我们先计算时间差与周期相除的余数
+                        if 'illness' in self.args.data_path:
+                            import math
+                            cycle_remainer = math.fmod(self.args.test_train_num-1 + self.args.pred_len - ii, self.period)
+                        else:
+                            cycle_remainer = (self.args.test_train_num-1 + self.args.pred_len - ii) % self.period
+                        # 定义判定的阈值
+                        threshold = self.period // 12
+                        # 如果余数在[-threshold, threshold]之间，那么考虑使用其做fine-tune
+                        # 否则的话不将其纳入计算距离的数据范围内
+                        if cycle_remainer > threshold or cycle_remainer < -threshold:
+                            continue
+                        
+                    if self.args.adapt_part_channels:
+                        lookback_x = batch_x[:, ii : ii+seq_len, self.selected_channels].reshape(-1)
+                    else:
+                        lookback_x = batch_x[:, ii : ii+seq_len, :].reshape(-1)
+                        
+                    dist = F.pairwise_distance(test_x, lookback_x, p=2).item()
+                    distance_pairs.append([ii, dist])
+
+                # 如果考虑距离计算，那么选距离最小；否则的话就选最近的（也即坐标最大的）：
+                if not self.args.remove_distance:
+                    # 先按距离从小到大排序
+                    cmp = lambda item: item[1]
+                    distance_pairs.sort(key=cmp)
                 else:
-                    lookback_x = batch_x[:, ii : ii+seq_len, :].reshape(-1)
-                dist = F.pairwise_distance(test_x, lookback_x, p=2).item()
-                distance_pairs.append([ii, dist])
+                    cmp = lambda item: item[0]
+                    distance_pairs.sort(key=cmp, reverse=True)
 
-            # 先按距离从小到大排序
-            cmp = lambda item: item[1]
-            distance_pairs.sort(key=cmp)
-
-            # 筛选出其中最小的selected_data_num个样本出来
-            selected_distance_pairs = distance_pairs[:self.args.selected_data_num]
+                # 筛选出其中最小的selected_data_num个样本出来
+                selected_distance_pairs = distance_pairs[:self.args.selected_data_num]
+                
             selected_indices = [item[0] for item in selected_distance_pairs]
             selected_distances = [item[1] for item in selected_distance_pairs]
             # print(f"selected_distance_pairs is: {selected_distance_pairs}")
 
             all_distances.append(selected_distances)
 
+
+            # 这个数组的内容是否需要预设？
             # params_adapted = torch.zeros((1)).to(self.device)
             cur_grad_list = []
-
+            
             # 开始训练
             for epoch in range(test_train_epochs):
 
@@ -855,7 +883,8 @@ class Exp_Main_Test(Exp_Basic):
                 print("last one:", a1[-1], a2[-1], a3[-1], a4[-1], all_angels[-1])
 
                 printed_selected_channels = [item+1 for item in self.selected_channels]
-                print(f"adapt_part_channels: {self.args.adapt_part_channels}, and adapt_cycle: {self.args.adapt_cycle}")
+                print(f"adapt_part_channels: {self.args.adapt_part_channels}")
+                print(f"remove_distance: {self.args.remove_distance}, remove_cycle: {self.args.remove_cycle}, remove_nearest: {self.args.remove_nearest}")
                 print(f"first 25th selected_channels: {printed_selected_channels[:25]}")
                 print(f"selected_distance_pairs are: {selected_distance_pairs}")
 

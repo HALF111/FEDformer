@@ -106,7 +106,7 @@ lr*50,ttn1000,select10: mse:0.345519483089447, mae:0.4005391299724579
 lr*100,ttn1000,select10: mse:0.344849169254303, mae:0.39996275305747986
 lr*200,ttn1000,select10: mse:0.34406331181526184, mae:0.39921897649765015
 lr*300,ttn1000,select10: mse:0.3440164029598236, mae:0.39904001355171204
-lr*500,ttn1000,selct10: mse:0.3461402952671051, mae:0.4002092182636261
+lr*500,ttn1000,select10: mse:0.3461402952671051, mae:0.4002092182636261
 python -u run.py --root_path ./dataset/ETT-small/ --data_path ETTh2.csv --model ETSformer --data ETTh2 --features M --seq_len 96 --pred_len 96 --e_layers 2 --d_layers 2 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --K 3 --learning_rate 1e-5 --itr 1 \
     --gpu 1 --d_model 512 --is_training 1 --task_id ETTh2 --lradj exponential_with_warmup --dropout 0.2 --label_len 0 --activation 'sigmoid' --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5 --adapt_cycle
 
@@ -151,3 +151,26 @@ lr*2,ttn200,select3: mse:2.6045937538146973, mae:1.0513383150100708
 lr*5,ttn200,select3: mse:5.086517333984375, mae:1.4711779356002808
 python -u run.py --root_path ./dataset/illness/ --data_path national_illness.csv --model ETSformer --data custom --features M --seq_len 60 --pred_len 24 --e_layers 2 --d_layers 2 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --K 1 --learning_rate 1e-3 --itr 1 \
     --gpu 1 --d_model 512 --is_training 1 --task_id ili --lradj exponential_with_warmup --dropout 0.2 --label_len 0 --activation 'sigmoid' --test_train_num 200 --run_select_with_distance --selected_data_num 3 --adapted_lr_times 5 --adapt_cycle
+
+
+
+# WTH_informer
+# 1.Autoformer
+
+# 2.FEDformer
+original: mse:0.48461171984672546, mae:0.49114471673965454
+lr*20,ttn10000,select10: mse:0.48604705929756165, mae:0.49172478914260864
+lr*5,ttn10000,select10: mse:0.48433244228363037, mae:0.49088990688323975
+lr*5,ttn20000,select5: mse:0.48446616530418396, mae:0.49101945757865906
+lr*10,ttn25000,select5: mse:0.48460277915000916, mae:0.49108758568763733
+python -u run.py --is_training 1 --root_path ./dataset/WTH_informer/ --data_path WTH_informer.csv --task_id WTH_informer --model FEDformer --data custom --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 12 --dec_in 12 --c_out 12 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --test_train_num 10
+
+# 3.Crossformer
+original: mse:0.4319957196712494, mae:0.4606797397136688
+lr*5,ttn1000,select10: mse:0.4318191707134247, mae:0.460480272769928
+lr*20,ttn1000,select10: mse:0.43188780546188354, mae:0.46041521430015564
+lr*10,ttn10000,select10: mse:0.4317159056663513, mae:0.46010661125183105
+lr*20,ttn10000,select10: mse:0.4316633939743042, mae:0.45971766114234924
+lr*50,ttn10000,select10: mse:0.4328922629356384, mae:0.45968472957611084
+python -u run.py --root_path ./dataset/WTH_informer/ --data_path WTH_informer.csv --model Crossformer --data custom --features M --seq_len 336 --pred_len 96 --enc_in 12 --dec_in 12 --c_out 12 --des 'Exp' --learning_rate 3e-5 --itr 1 \
+    --gpu 1 --is_training 1 --seg_len 12 --d_model 256 --d_ff 512 --e_layers 3 --n_heads 4 --task_id WTH_informer --dropout 0.2 --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5 --adapt_cycle

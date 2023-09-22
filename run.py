@@ -151,8 +151,13 @@ def main():
     parser.add_argument('--get_data_error', action='store_true')
 
     parser.add_argument('--adapt_part_channels', action='store_true')
-    # 仅对周期性数据做fine-tuning
-    parser.add_argument('--adapt_cycle', action='store_true')
+    # # 仅对周期性数据做fine-tuning
+    # parser.add_argument('--adapt_cycle', action='store_true')
+    
+    # 对几个指标的ablation study？
+    parser.add_argument('--remove_distance', action='store_true')
+    parser.add_argument('--remove_cycle', action='store_true')
+    parser.add_argument('--remove_nearest', action='store_true')
 
     # KNN
     parser.add_argument('--run_knn', action='store_true')
