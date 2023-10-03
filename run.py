@@ -116,7 +116,7 @@ def main():
     parser.add_argument('--test_train_num', type=int, default=10, help='how many samples to be trained during test')
     parser.add_argument('--adapted_lr_times', type=float, default=1, help='the times of lr during adapted')  # adaptation时的lr是原来的lr的几倍？
     parser.add_argument('--adapted_batch_size', type=int, default=1, help='the batch_size for adaptation use')  # adaptation时的数据集取的batch_size设置为多大
-    parser.add_argument('--test_train_epochs', type=int, default=1, help='the batch_size for adaptation use')  # adaptation时的数据集取的batch_size设置为多大
+    parser.add_argument('--test_train_epochs', type=int, default=1, help='the epochs for test-time adaptation')  # adaptation时做几轮adaptation？
     parser.add_argument('--run_train', action='store_true')
     parser.add_argument('--run_test', action='store_true')
     parser.add_argument('--run_test_batchsize1', action='store_true')
@@ -158,6 +158,12 @@ def main():
     parser.add_argument('--remove_distance', action='store_true')
     parser.add_argument('--remove_cycle', action='store_true')
     parser.add_argument('--remove_nearest', action='store_true')
+    
+    # 微调整个模型
+    parser.add_argument('--adapt_whole_model', action='store_true')
+    
+    # 画出微调前后的结果对比图
+    parser.add_argument('--draw_adapt_figure', action='store_true')
 
     # KNN
     parser.add_argument('--run_knn', action='store_true')
@@ -273,17 +279,21 @@ def main():
                 print('>>>>>>>my testing with test-time training : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
                 mse, mae = exp.select_with_distance(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs)
                 
-                # 存储mse和mae结果，便于读取
-                result_dir = "./mse_and_mae_results"
-                dataset_name = args.data_path.replace(".csv", "")
-                file_name = f"{args.model}_{dataset_name}_pl{args.pred_len}_ttn{args.test_train_num}_select{args.selected_data_num}_lr{args.adapted_lr_times:.2f}.txt"
+                # # 存储mse和mae结果，便于读取
+                # result_dir = "./mse_and_mae_results"
+                # dataset_name = args.data_path.replace(".csv", "")
+                # file_name = f"{args.model}_{dataset_name}_pl{args.pred_len}_ttn{args.test_train_num}_select{args.selected_data_num}_lr{args.adapted_lr_times:.2f}.txt"
 
-                if not os.path.exists(result_dir):
-                    os.makedirs(result_dir)
-                file_path = os.path.join(result_dir, file_name)
-                with open(file_path, "w") as f:
-                    f.write(f"{mse}, {mae}")
+                # if not os.path.exists(result_dir):
+                #     os.makedirs(result_dir)
+                # file_path = os.path.join(result_dir, file_name)
+                # with open(file_path, "w") as f:
+                #     f.write(f"{mse}, {mae}")
 
+            if args.adapt_whole_model:
+                # 微调整个模型
+                mse, mae = exp.adapt_whole_model(setting, test=1, is_training_part_params=False, use_adapted_model=True, test_train_epochs=args.test_train_epochs)
+            
             if args.run_get_grads:
                 print('>>>>>>>get grads : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
                 if args.get_grads_from == "test":  # 在test数据集上做

@@ -9,7 +9,7 @@ dir_name=all_result
 
 # 1.1 FEDformer
 python -u run.py --is_training 1 --root_path ./dataset/traffic/ --data_path traffic.csv --task_id traffic --model FEDformer --data custom --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 862 --dec_in 862 --c_out 862 --des 'Exp' --itr 1 --train_epochs 10 --gpu 0  --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 2000 --remove_distance --remove_cycle --remove_nearest
-original: 
+original: mse:0.5744055509567261, mae:0.35589635372161865
 # 1. normal
 lr*2000,ttn200,select10: mse:0.5126578211784363, mae:0.34407877922058105
 # 2.remove_distance
@@ -19,6 +19,44 @@ lr*2000,ttn200,select10: mse:0.5316569209098816, mae:0.34730303287506104
 # 4.remove_distance + remove_cycle + remove_nearest
 lr*2000,ttn200,select10: mse:0.5203375220298767, mae:0.34564638137817383
 
+
+# 1.2 Autoformer
+python -u run.py --is_training 1 --root_path ./dataset/traffic/ --data_path traffic.csv --task_id traffic --model Autoformer --data custom --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 862 --dec_in 862 --c_out 862 --des 'Exp' --itr 1 --train_epochs 10 --gpu 0  --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 2000 --remove_distance --remove_cycle --remove_nearest
+original: mse:0.620464563369751, mae:0.3909095227718353
+# 1. normal
+mse:0.5646195411682129, mae:0.37694627046585083
+# 2.remove_distance
+mse:0.5767139792442322, mae:0.3795345723628998
+# 3.remove_distance + remove_cycle
+mse:0.5898356437683105, mae:0.3843180537223816
+# 4.remove_distance + remove_cycle + remove_nearest
+mse:0.5747594237327576, mae:0.37943434715270996
+
+
+# 1.3 Informer
+python -u run.py --is_training 1 --root_path ./dataset/traffic/ --data_path traffic.csv --task_id traffic --model Informer --data custom --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 862 --dec_in 862 --c_out 862 --des 'Exp' --itr 1 --train_epochs 10 --gpu 0  --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 2000 --remove_distance --remove_cycle --remove_nearest
+original: mse:0.731, mae:0.406
+# 1. normal
+mse:0.628, mae:0.393
+# 2.remove_distance
+mse:0.6273484826087952, mae:0.3927730917930603
+# 3.remove_distance + remove_cycle
+mse:0.636137843132019, mae:0.3963523209095001
+# 4.remove_distance + remove_cycle + remove_nearest
+mse:0.639647364616394, mae:0.3975795805454254
+
+
+# 1.4 ETSformer
+python -u run.py --root_path ./dataset/traffic/ --data_path traffic.csv --model ETSformer --data custom --features M --seq_len 336 --pred_len 96 --e_layers 2 --d_layers 2 --enc_in 862 --dec_in 862 --c_out 862 --des 'Exp' --K 3 --learning_rate 1e-3 --itr 1 --d_model 512 --is_training 1 --task_id traffic --lradj exponential_with_warmup --dropout 0.2 --label_len 0 --activation 'sigmoid' --gpu 0 --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 200 --remove_distance --remove_cycle --remove_nearest
+original: mse:0.599, mae:0.386
+# 1. normal
+mse:0.487, mae:0.354
+# 2.remove_distance
+mse:0.4887968897819519, mae:0.35630592703819275
+# 3.remove_distance + remove_cycle
+mse:0.4994681477546692, mae:0.3610208034515381
+# 4.remove_distance + remove_cycle + remove_nearest
+mse:0.49303141236305237, mae:0.35640862584114075
 
 
 # 2. illness
@@ -101,7 +139,7 @@ lr*50,ttn200,select3: mse:2.37680721282959, mae:0.9892348051071167
 
 
 # 2.5 Crossformer
-python -u run.py --root_path ./dataset/illness/ --data_path national_illness.csv --model Crossformer --data custom --features M --seq_len 48 --pred_len 24 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --learning_rate 5e-4 --itr 1 --is_training 1 --seg_len 6 --d_model 256 --d_ff 512 --e_layers 3 --n_heads 4 --task_id ili --dropout 0.6 --gpu 0 --test_train_num 200 --run_select_with_distance --selected_data_num 3 --adapted_lr_times 0.5 --remove_distance --remove_cycle --remove_nearest
+python -u run.py --root_path ./dataset/illness/ --data_path national_illness.csv --model Crossformer --data custom --features M --seq_len 48 --pred_len 24 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --learning_rate 5e-4 --itr 1 --is_training 1 --seg_len 6 --d_model 256 --d_ff 512 --e_layers 3 --n_heads 4 --task_id ili --dropout 0.6 --gpu 0 --test_train_num 200 --run_select_with_distance --selected_data_num 3 --adapted_lr_times 50 --remove_distance --remove_cycle --remove_nearest
 original: mse:3.328763008117676, mae:1.2749556303024292
 # 1. normal
 lr*50,ttn200,select3: mse:2.3527326583862305, mae:0.9860926270484924
@@ -114,6 +152,71 @@ lr*50,ttn200,select3: mse:2.7046263217926025, mae:1.0982064008712769
 
 # 4.remove_distance + remove_cycle + remove_nearest
 lr*50,ttn200,select3: mse:2.821445941925049, mae:1.1353179216384888
+
+
+
+
+# 3. Electricity
+# 1. FEDformer
+python -u run.py --is_training 1 --root_path ./dataset/electricity/ --data_path electricity.csv --task_id ECL --model FEDformer --data custom --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 321 --dec_in 321 --c_out 321 --des 'Exp' --itr 1 --gpu 0 --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 500 --remove_distance --remove_cycle --remove_nearest
+original: mse:0.188, mae:0.304
+# 1. normal
+mse:0.172, mae:0.284
+# 2.remove_distance
+mse:0.17177370190620422, mae:0.2827122211456299
+# 3.remove_distance + remove_cycle
+mse:0.17308975756168365, mae:0.28376251459121704
+# 4.remove_distance + remove_cycle + remove_nearest
+mse:0.1745980679988861, mae:0.2871730327606201
+
+# 2. Autoformer
+python -u run.py --is_training 1 --root_path ./dataset/electricity/ --data_path electricity.csv --task_id ECL --model Autoformer --data custom --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 321 --dec_in 321 --c_out 321 --des 'Exp' --itr 1 --gpu 0 --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 1000 --remove_distance --remove_cycle --remove_nearest
+original: mse:0.207, mse:0.324
+# 1. normal
+mse:0.189, mae:0.304
+# 2.remove_distance
+mse:0.1956806629896164, mae:0.3094704747200012
+# 3.remove_distance + remove_cycle
+mse:0.19936515390872955, mae:0.3125047981739044
+# 4.remove_distance + remove_cycle + remove_nearest
+mse:0.19282908737659454, mae:0.3091682195663452
+
+# 3. Informer
+python -u run.py --is_training 1 --root_path ./dataset/electricity/ --data_path electricity.csv --task_id ECL --model Informer --data custom --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 321 --dec_in 321 --c_out 321 --des 'Exp' --itr 1 --gpu 0 --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 500 --remove_distance --remove_cycle --remove_nearest
+original: mse:0.321, mae:0.407
+# 1. normal
+mse:0.245, mae:0.355
+# 2.remove_distance
+mse:0.24231937527656555, mae:0.35214951634407043
+# 3.remove_distance + remove_cycle
+mse:0.2421179860830307, mae:0.3518781363964081
+# 4.remove_distance + remove_cycle + remove_nearest
+mse:0.2421179860830307, mae:0.3518781363964081
+
+# 4. ETSformer
+python -u run.py --root_path ./dataset/electricity/ --data_path electricity.csv --model ETSformer --data custom --features M --seq_len 336 --pred_len 96 --e_layers 2 --d_layers 2 --enc_in 321 --dec_in 321 --c_out 321 --des 'Exp' --K 3 --learning_rate 3e-4 --itr 1 --gpu 0 --d_model 512 --is_training 1 --task_id ECL --lradj exponential_with_warmup --dropout 0.2 --label_len 0 --activation 'sigmoid' --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 1000 --remove_distance --remove_cycle --remove_nearest
+original: mse:0.187, mae:0.304
+# 1. normal
+mse:0.171, mae:0.285
+# 2.remove_distance
+mse:0.17370165884494781, mae:0.287659227848053
+# 3.remove_distance + remove_cycle
+mse:0.17433278262615204, mae:0.288535475730896
+# 4.remove_distance + remove_cycle + remove_nearest
+mse:0.17431332170963287, mae:0.2897290885448456
+
+# 5. Crossformer
+python -u run.py --root_path ./dataset/electricity/ --data_path electricity.csv --model Crossformer --data custom --features M --seq_len 336 --pred_len 96 --enc_in 321 --dec_in 321 --c_out 321 --des 'Exp' --learning_rate 5e-4 --itr 1 --gpu 0 --is_training 1 --seg_len 12 --d_model 64 --d_ff 128 --e_layers 3 --n_heads 2 --task_id ECL --dropout 0.2 --gpu 0 --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 20 --remove_distance --remove_cycle --remove_nearest
+original: mse:0.184, mae:0.297
+# 1. normal
+mse:0.183, mae:0.295
+# 2.remove_distance
+mse:0.18820136785507202, mae:0.30169248580932617
+# 3.remove_distance + remove_cycle
+mse:0.1884719729423523, mae:0.3022782504558563
+# 4.remove_distance + remove_cycle + remove_nearest
+mse:0.18406078219413757, mae:0.29652708768844604
+
 
 
 

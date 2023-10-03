@@ -1,0 +1,421 @@
+Args in experiment:
+Namespace(is_training=1, task_id='traffic', model='ETSformer', data='custom', root_path='./dataset/traffic/', data_path='traffic.csv', features='M', target='OT', freq='h', checkpoints='./checkpoints/', seq_len=336, label_len=0, pred_len=96, enc_in=862, dec_in=862, c_out=862, d_model=512, n_heads=8, e_layers=2, d_layers=2, d_ff=2048, moving_avg=[24], factor=1, distil=True, dropout=0.2, embed='timeF', activation='sigmoid', output_attention=False, do_predict=False, bucket_size=4, n_hashes=4, version='Fourier', mode_select='random', modes=64, L=3, base='legendre', cross_activation='tanh', K=3, min_lr=1e-30, warmup_epochs=3, std=0.2, smoothing_learning_rate=0, damping_learning_rate=0, optim='adam', seg_len=6, win_size=2, cross_factor=10, baseline=False, num_workers=10, itr=1, train_epochs=20, batch_size=32, patience=5, learning_rate=0.001, des='Exp', loss='mse', lradj='exponential_with_warmup', use_amp=False, use_gpu=True, gpu=1, use_multi_gpu=False, devices='0,1', test_train_num=1000, adapted_lr_times=200.0, adapted_batch_size=1, test_train_epochs=1, run_train=False, run_test=False, run_test_batchsize1=False, run_adapt=False, run_calc=False, run_get_grads=False, run_get_lookback_data=False, run_select_with_distance=True, selected_data_num=2, get_grads_from='test', adapted_degree='small', lambda_reg=1, alpha=1, use_nearest_data=False, use_further_data=False, adapt_start_pos=1, run_calc_acf=False, acf_lag=1, run_calc_kldiv=False, get_data_error=False, adapt_part_channels=False, remove_distance=False, remove_cycle=False, remove_nearest=False, adapt_whole_model=False, run_knn=False, feature_dim=50, k_value=10)
+-------Start iteration 1--------------------------
+Use GPU: cuda:1
+>>>>>>>my testing with test-time training : traffic_ETSformer_random_modes64_custom_ftM_sl336_ll0_pl96_dm512_nh8_el2_dl2_df2048_fc1_ebtimeF_dtTrue_Exp_0<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+test 3413
+loading model from checkpoint !!!
+	iters: 100, cost time: 26.614245176315308s
+[]
+mse:0.501379132270813, mae:0.3371901214122772
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5447616764903068 0.6500525391101837 0.0 0.5013791793584823 39.24346799816376
+last one: 0.5447998642921448 0.613778829574585 0 0.5163257122039795 43.776337175922734
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[759, 393.6131555261087], [591, 395.34841759974984]]
+	iters: 200, cost time: 60.56787896156311s
+[]
+mse:0.49060308933258057, mae:0.3325517773628235
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5313435737788678 0.6167853546142578 0.0 0.49060295164585116 38.069845708985056
+last one: 0.4846756160259247 0.6672676801681519 0 0.4429264962673187 42.74129731589474
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[591, 378.06982011859276], [423, 382.8779061407153]]
+	iters: 300, cost time: 107.92463874816895s
+[]
+mse:0.4820087254047394, mae:0.3277752697467804
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5207873144745827 0.6263160117467245 0.0 0.4820090798536936 38.18733012095134
+last one: 0.5473306775093079 0.6061742305755615 0 0.5035750269889832 30.325087268668593
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 368.596456567039], [423, 384.6493269692292]]
+	iters: 400, cost time: 148.66601014137268s
+[]
+mse:0.4794139564037323, mae:0.32848864793777466
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5193565342575311 0.6078077737241984 0.0 0.4794143818318844 37.15840053822541
+last one: 0.4359128475189209 0.5524179339408875 0 0.41001972556114197 40.015947279770565
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 369.66631937072117], [255, 382.85369960385]]
+	iters: 500, cost time: 197.1690182685852s
+[]
+mse:0.4687451124191284, mae:0.324409544467926
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5070496345162392 0.5933943137526512 0.0 0.4687448789477348 37.22667192905483
+last one: 0.551666796207428 0.5229061841964722 0 0.49411699175834656 29.83591595421038
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 358.3112870856749], [759, 376.6834378827922]]
+	iters: 600, cost time: 244.1726040840149s
+[]
+mse:0.4762219190597534, mae:0.32789158821105957
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5147484095891317 0.5756174326439698 0.0 0.4762221612036228 37.36843067852631
+last one: 0.686116635799408 0.45536524057388306 0 0.6670997142791748 56.40155621184536
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 348.3487937176506], [759, 387.4682992820536]]
+	iters: 700, cost time: 297.3591411113739s
+[]
+mse:0.5117895007133484, mae:0.339520126581192
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5522202511344637 0.5668686332447188 0.0 0.5117897156732423 37.916832210342335
+last one: 0.7129281759262085 0.5416265726089478 0 0.6391921043395996 31.165556532470436
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 384.50169289899003], [759, 414.4271059039106]]
+	iters: 800, cost time: 357.2034182548523s
+[]
+mse:0.510617733001709, mae:0.3376274108886719
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5501353368535638 0.5621856633201241 0.0 0.5106180442869663 38.200290118145915
+last one: 0.49972373247146606 0.6053204536437988 0 0.4711531400680542 42.52806851882499
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 397.4653194962452], [759, 420.846879985613]]
+	iters: 900, cost time: 404.5000865459442s
+[]
+mse:0.5161226987838745, mae:0.34005555510520935
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5582320008675258 0.5661265170574188 0.0 0.5161231389310625 37.83976338893864
+last one: 0.533148467540741 0.46561160683631897 0 0.5016819834709167 43.75580856280965
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[759, 401.2403828712261], [591, 420.65389360196133]]
+	iters: 1000, cost time: 455.38746666908264s
+[]
+mse:0.5239896774291992, mae:0.3415570557117462
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5652637485861778 0.5677199545800686 0.0 0.5239901610612869 38.64587586481187
+last one: 0.8659973740577698 0.7220728397369385 0 0.7784652709960938 33.7957450349624
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[759, 410.5532468711723], [591, 415.5857764806045]]
+	iters: 1100, cost time: 519.3480999469757s
+[]
+mse:0.53145831823349, mae:0.34451204538345337
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5746653327616779 0.569404065202583 0.0 0.531459730755199 38.12811497482894
+last one: 0.5059636831283569 0.6222675442695618 0 0.48384857177734375 40.75024786560862
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[591, 375.90779912198246], [927, 408.14042670509923]]
+	iters: 1200, cost time: 570.4694697856903s
+[]
+mse:0.5337344408035278, mae:0.34604358673095703
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5784667348613342 0.5840833916515112 0.0 0.5337363453954458 37.78648741435009
+last one: 0.723989725112915 0.645183265209198 0 0.6402629017829895 33.39233704028949
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 362.298960052125], [423, 408.86242753274263]]
+	iters: 1300, cost time: 612.398500919342s
+[]
+mse:0.5389094948768616, mae:0.3506501615047455
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5830406325826278 0.5842180266517859 0.0 0.5389110378806408 38.289076711803
+last one: 0.5823734402656555 0.6620199084281921 0 0.5471441745758057 41.7891359920247
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 377.1808444418998], [423, 414.46668044821206]]
+	iters: 1400, cost time: 691.2594227790833s
+[]
+mse:0.5413240194320679, mae:0.3523764908313751
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5877389461866447 0.5939615646643298 0.0 0.5413252643389361 37.90541639800014
+last one: 0.6146825551986694 0.6633853912353516 0 0.5565352439880371 33.99774899011395
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 395.1288846656755], [759, 401.33334465517277]]
+	iters: 1500, cost time: 763.2136108875275s
+[]
+mse:0.5347452163696289, mae:0.350230872631073
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.580436347146829 0.5929907754858335 0.0 0.5347468237082164 37.85147768353149
+last one: 0.515531063079834 0.6598857641220093 0 0.444627583026886 30.799844773538716
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[759, 402.78228852647544], [927, 405.0262426968918]]
+	iters: 1600, cost time: 805.7401478290558s
+[]
+mse:0.5298933982849121, mae:0.34996336698532104
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5765621220692992 0.5957832221128047 0.0 0.5298944330960512 37.74276493239013
+last one: 0.445302277803421 0.47745460271835327 0 0.4288201928138733 49.64701030332171
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 392.0123927755493], [591, 395.8092106206886]]
+	iters: 1700, cost time: 858.5174865722656s
+[]
+mse:0.5272062420845032, mae:0.34919092059135437
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5736174055057414 0.5931207951202112 0.0 0.5272069327270283 37.85747612421576
+last one: 0.6587268710136414 0.6729229688644409 0 0.5840606093406677 32.89241565474463
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 383.9418205293834], [423, 392.91229766992245]]
+	iters: 1800, cost time: 897.4928274154663s
+[]
+mse:0.5269191861152649, mae:0.34912148118019104
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5727562549048 0.588920907560322 0.0 0.5269195593562391 37.916212861518765
+last one: 0.46671926975250244 0.4372127056121826 0 0.4454590976238251 37.663127363482396
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 380.5694397627103], [759, 400.63780379476617]]
+	iters: 1900, cost time: 944.1365902423859s
+[]
+mse:0.5248351097106934, mae:0.3486758768558502
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5706472025262682 0.5874225802170603 0.0 0.5248348811896224 37.779178394836705
+last one: 0.44781026244163513 0.5737659931182861 0 0.41707807779312134 42.436081968843865
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 368.3402691272186], [759, 393.3563381486935]]
+	iters: 2000, cost time: 984.5087394714355s
+[]
+mse:0.5162705779075623, mae:0.3470796048641205
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5607556578963995 0.5823200898468495 0.0 0.5162702999860048 38.1350150283617
+last one: 0.45383480191230774 0.5245535969734192 0 0.4175991714000702 34.15360470428876
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[759, 378.3194308238265], [927, 395.8917169235711]]
+	iters: 2100, cost time: 1046.5580651760101s
+[]
+mse:0.5138121247291565, mae:0.34611284732818604
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5581097398627372 0.5809536789712452 0.0 0.5138125056454114 38.08202802509711
+last one: 0.3999688923358917 0.4385721981525421 0 0.3883768916130066 48.844793738463714
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[759, 377.26144771745305], [927, 396.9512470466314]]
+	iters: 2200, cost time: 1094.6321704387665s
+[]
+mse:0.5229443311691284, mae:0.3505353331565857
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5668063381991603 0.5775608413327824 0.0 0.5229444930770181 38.42569985081853
+last one: 0.9902803301811218 0.6049976944923401 0 0.9302736520767212 44.68670163912823
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[759, 381.03599916209737], [591, 387.26366740664434]]
+	iters: 2300, cost time: 1129.1933388710022s
+[]
+mse:0.5301038026809692, mae:0.3539530038833618
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5732799721671188 0.5744519567230474 0.0 0.5301033243407374 38.84927192473482
+last one: 0.5726543068885803 0.5483402013778687 0 0.5501379370689392 36.448636391715496
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 431.54726328753713], [591, 436.6915031030546]]
+	iters: 2400, cost time: 1170.478866815567s
+[]
+mse:0.5394881367683411, mae:0.357168048620224
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5834532973046104 0.5843496037522952 0.0 0.5394877864172062 38.63219382550252
+last one: 0.7450388073921204 0.6197747588157654 0 0.709923505783081 41.12094620478423
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[590, 421.16167864006775], [927, 427.59726507061526]]
+	iters: 2500, cost time: 1227.4887862205505s
+[]
+mse:0.538247287273407, mae:0.358144611120224
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5812033086180687 0.5800139438509941 0.0 0.5382478881359101 39.08724831638914
+last one: 0.6502890586853027 0.6845061779022217 0 0.6201149821281433 55.51907955672936
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[758, 393.05847735418365], [254, 399.9127953130913]]
+	iters: 2600, cost time: 1305.6305992603302s
+[]
+mse:0.5521737337112427, mae:0.3656466007232666
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5945455951988697 0.5833736424721204 0.0 0.5521745282182327 40.1507641580752
+last one: 0.7200866341590881 0.47462350130081177 0 0.7115042209625244 75.20144172217245
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[254, 423.22229663626433], [590, 428.6864226726679]]
+	iters: 2700, cost time: 1374.8993265628815s
+[]
+mse:0.5513473749160767, mae:0.36638081073760986
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5931247467796008 0.5821078418471195 0.0 0.5513482557954612 40.5321554927135
+last one: 0.7754994034767151 0.6259081363677979 0 0.7240177989006042 43.65157567518635
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[422, 479.25263284579955], [86, 484.4497398013959]]
+	iters: 2800, cost time: 1434.422149181366s
+[]
+mse:0.5551255941390991, mae:0.3669699430465698
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5962214156559535 0.5800700984682355 0.0 0.5551263340669019 41.04546648845167
+last one: 0.47408029437065125 0.5220407247543335 0 0.4595526158809662 52.91973097525303
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[422, 468.5898272799405], [759, 476.7784092048103]]
+	iters: 2900, cost time: 1490.1596047878265s
+[]
+mse:0.5591276288032532, mae:0.3674857020378113
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5995949220760115 0.5891755739779307 0.0 0.5591284578935853 41.72261279031494
+last one: 0.7698788642883301 0.9256585836410522 0 0.76424640417099 81.26263121701909
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[759, 460.49394036906426], [422, 476.0615745209801]]
+	iters: 3000, cost time: 1547.441112279892s
+[]
+mse:0.5560628771781921, mae:0.3666019141674042
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5954863369663557 0.5898367805580298 0.0 0.5560647649765015 42.499425491713126
+last one: 0.4784495234489441 0.7235445976257324 0 0.4498358964920044 48.83811678619744
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[591, 393.6935345101447], [254, 409.96996751440093]]
+	iters: 3100, cost time: 1605.3221254348755s
+[]
+mse:0.5562933683395386, mae:0.36678099632263184
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5953476405143738 0.5982994140059718 0.0 0.5562957554382663 43.03349896942756
+last one: 0.4809873700141907 0.5516376495361328 0 0.4731381833553314 67.71319323777125
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[591, 408.2384151433693], [86, 421.8429149366188]]
+	iters: 3200, cost time: 1691.2043144702911s
+[]
+mse:0.557518482208252, mae:0.36716267466545105
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5960131758172065 0.5960159661713987 0.0 0.5575206556357444 43.2747476598375
+last one: 0.7960530519485474 0.8255771994590759 0 0.7524779438972473 42.82478618209885
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 382.1265158852583], [423, 411.5767296661618]]
+	iters: 3300, cost time: 1718.800843000412s
+[]
+mse:0.5595304369926453, mae:0.370827317237854
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5975859911423741 0.5994317824732174 0.0 0.5595328911145528 43.57531957013365
+last one: 0.5879227519035339 0.4909953773021698 0 0.5821877717971802 72.88487127450911
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 420.4508740179049], [423, 444.8473269140612]]
+	iters: 3320, cost time: 1762.2402122020721s
+[]
+mse:0.5597448945045471, mae:0.3715699017047882
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5976116885352566 0.5988875680300126 0.0 0.5597471568598805 43.75760702409735
+last one: 0.5885009765625 0.5131710767745972 0 0.5817349553108215 74.52967685039249
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 434.7070079190362], [423, 444.4118630842851]]
+	iters: 3330, cost time: 1805.046557188034s
+[]
+mse:0.5599154829978943, mae:0.3719683587551117
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5976949503382405 0.5987346551439784 0.0 0.5599176100066474 43.84782697859052
+last one: 0.6449770331382751 0.5615041255950928 0 0.6347082257270813 72.74597007243145
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[927, 437.47573371278713], [423, 442.54340271312617]]
+	iters: 3340, cost time: 1834.538652896881s
+[]
+mse:0.5602051019668579, mae:0.37239697575569153
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5979014101231883 0.5986956526954731 0.0 0.560207100453491 43.938597703032464
+last one: 0.6802306771278381 0.6038070917129517 0 0.6700873374938965 74.99693826482599
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[423, 443.06004966388707], [927, 445.5935467411507]]
+	iters: 3350, cost time: 1872.5394718647003s
+[]
+mse:0.5605296492576599, mae:0.3728410303592682
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5981470344226751 0.5987544955780257 0.0 0.5605320152595862 44.02884466864471
+last one: 0.6937397718429565 0.6793092489242554 0 0.6810243725776672 74.15449077530862
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[423, 443.9841694778262], [927, 446.38477002411366]]
+	iters: 3360, cost time: 1910.8963315486908s
+[]
+mse:0.5609443187713623, mae:0.3732890784740448
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.598488724435724 0.5991435577472051 0.0 0.5609466141533284 44.120423236090204
+last one: 0.7397807240486145 0.7848306894302368 0 0.7254742383956909 74.79655302509236
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[423, 443.3336544600956], [927, 450.16843845653756]]
+	iters: 3370, cost time: 1962.3890743255615s
+[]
+mse:0.5614054799079895, mae:0.37374022603034973
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5988815958581268 0.5997236847877503 0.0 0.5614077960878876 44.210611570092354
+last one: 0.7218243479728699 0.7922187447547913 0 0.7069602012634277 74.01738432852305
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[423, 444.26247459715154], [927, 451.3475522957218]]
+	iters: 3380, cost time: 1997.831163406372s
+[]
+mse:0.5617198348045349, mae:0.37413010001182556
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5991349322467866 0.6002078858705667 0.0 0.5617221449959208 44.290231626915464
+last one: 0.6767660975456238 0.7633708715438843 0 0.6580013632774353 69.32632455808238
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[423, 465.6643352020124], [927, 479.21661278365576]]
+	iters: 3390, cost time: 2043.2924098968506s
+[]
+mse:0.5620188117027283, mae:0.3745136260986328
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 0.5993267121128628 0.6007913246267313 0.0 0.5620211086090335 44.41501456244
+last one: 0.6555144190788269 0.8226434588432312 0 0.6570046544075012 89.07109776378002
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+selected_distance_pairs are: [[423, 474.2695079956344], [399, 487.24353024283226]]
+test shape: (3393, 1, 96, 862) (3393, 1, 96, 862)
+test shape: (3393, 96, 862) (3393, 96, 862)
+mse:0.5620945692062378, mae:0.37462130188941956
+Test - cost time: 2113.2408645153046s

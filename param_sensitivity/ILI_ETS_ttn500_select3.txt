@@ -1,0 +1,101 @@
+Args in experiment:
+Namespace(is_training=1, task_id='ili', model='ETSformer', data='custom', root_path='./dataset/illness/', data_path='national_illness.csv', features='M', target='OT', freq='h', checkpoints='./checkpoints/', seq_len=60, label_len=0, pred_len=24, enc_in=7, dec_in=7, c_out=7, d_model=512, n_heads=8, e_layers=2, d_layers=2, d_ff=2048, moving_avg=[24], factor=1, distil=True, dropout=0.2, embed='timeF', activation='sigmoid', output_attention=False, do_predict=False, bucket_size=4, n_hashes=4, version='Fourier', mode_select='random', modes=64, L=3, base='legendre', cross_activation='tanh', K=1, min_lr=1e-30, warmup_epochs=3, std=0.2, smoothing_learning_rate=0, damping_learning_rate=0, optim='adam', seg_len=6, win_size=2, cross_factor=10, baseline=False, num_workers=10, itr=1, train_epochs=20, batch_size=32, patience=5, learning_rate=0.001, des='Exp', loss='mse', lradj='exponential_with_warmup', use_amp=False, use_gpu=True, gpu=0, use_multi_gpu=False, devices='0,1', test_train_num=500, adapted_lr_times=0.5, adapted_batch_size=1, test_train_epochs=1, run_train=False, run_test=False, run_test_batchsize1=False, run_adapt=False, run_calc=False, run_get_grads=False, run_get_lookback_data=False, run_select_with_distance=True, selected_data_num=3, get_grads_from='test', adapted_degree='small', lambda_reg=1, alpha=1, use_nearest_data=False, use_further_data=False, adapt_start_pos=1, run_calc_acf=False, acf_lag=1, run_calc_kldiv=False, get_data_error=False, adapt_part_channels=False, remove_distance=False, remove_cycle=False, remove_nearest=False, run_knn=False, feature_dim=50, k_value=10)
+-------Start iteration 1--------------------------
+Use GPU: cuda:0
+>>>>>>>my testing with test-time training : ili_ETSformer_random_modes64_custom_ftM_sl60_ll0_pl24_dm512_nh8_el2_dl2_df2048_fc1_ebtimeF_dtTrue_Exp_0<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+test 170
+loading model from checkpoint !!!
+	iters: 80, cost time: 7.171500205993652s
+[]
+mse:1.7754210233688354, mae:0.8102506399154663
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 1.7833087339997291 0.4356732540298253 0.0 1.7754209887236356 88.12015896968848
+last one: 1.158011555671692 0.8012492060661316 0 1.1261146068572998 73.26135704809103
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5]
+selected_distance_pairs are: [[470, 24.806294725791968], [261, 26.9681976040814], [260, 27.071466490645427]]
+	iters: 90, cost time: 7.79393458366394s
+[]
+mse:1.6274571418762207, mae:0.7752840518951416
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 1.6354081923762958 0.49406301813820996 0.0 1.6274572274751133 85.61551024997974
+last one: 0.2028103619813919 0.3981039226055145 0 0.15659284591674805 31.56126292720287
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5]
+selected_distance_pairs are: [[470, 17.930467416530053], [469, 18.41476373934035], [468, 20.592392177272544]]
+	iters: 100, cost time: 8.419738054275513s
+[]
+mse:1.5016361474990845, mae:0.7419785261154175
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 1.5144228756427764 0.47275598991662265 0.0 1.5016360367834567 81.83741810650878
+last one: 0.8340063691139221 0.3770318925380707 0 0.7769731283187866 55.80860971624897
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5]
+selected_distance_pairs are: [[469, 16.827700132400334], [470, 17.285334309976474], [468, 17.873211023257664]]
+	iters: 110, cost time: 9.094852209091187s
+[]
+mse:1.6096802949905396, mae:0.7678314447402954
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 1.6212622626261277 0.4638824020258405 0.0 1.6096803384748373 81.39331687956712
+last one: 4.912878036499023 0.4099806547164917 0 4.841916084289551 35.54496407717867
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5]
+selected_distance_pairs are: [[469, 17.25709973345618], [470, 17.6835172737836], [468, 18.23463186572215]]
+	iters: 120, cost time: 9.775909185409546s
+[]
+mse:1.9393337965011597, mae:0.840178370475769
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 1.9929671908418338 0.5330734964770575 0.0 1.9393338184803723 76.64705364783055
+last one: 7.033853530883789 1.5709285736083984 0 6.280939102172852 34.592497558445324
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5]
+selected_distance_pairs are: [[470, 18.589427953365234], [469, 18.756292349098356], [468, 20.21880749299416]]
+	iters: 130, cost time: 10.569170236587524s
+[]
+mse:2.2130398750305176, mae:0.9120893478393555
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 2.2903362370454348 0.6118432702066806 0.0 2.2130396275566175 75.18568707868293
+last one: 4.724898815155029 1.4782648086547852 0 4.227263927459717 49.55398965292939
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5]
+selected_distance_pairs are: [[470, 26.034199447350183], [469, 27.069536167034137], [468, 29.076528309696236]]
+	iters: 140, cost time: 11.275745630264282s
+[]
+mse:2.3649637699127197, mae:0.9622781276702881
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 2.4371109558003288 0.6363808020151087 0.0 2.3649635963141917 75.45971035115699
+last one: 3.860577344894409 0.3292025923728943 0 3.776522397994995 61.59399614251225
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5]
+selected_distance_pairs are: [[470, 32.2912700499672], [469, 34.41309972436252], [418, 35.69772220239737]]
+	iters: 150, cost time: 11.941063404083252s
+[]
+mse:2.2715935707092285, mae:0.9492130279541016
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 2.3450535639127095 0.612020191376408 0.0 2.271593572795391 74.29902831277762
+last one: 0.8750348091125488 0.40991878509521484 0 1.0616430044174194 98.96066408345482
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5]
+selected_distance_pairs are: [[470, 32.14093320820546], [418, 33.89754192765244], [469, 35.129846070497116]]
+	iters: 160, cost time: 12.601499080657959s
+[]
+mse:2.351280689239502, mae:0.9844069480895996
+1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
+average: 2.3966061547398567 0.6447534077102318 0.0 2.3512806941755118 77.47751984214644
+last one: 5.160741806030273 2.090373992919922 0 5.339408874511719 120.62612319774813
+adapt_part_channels: False
+remove_distance: False, remove_cycle: False, remove_nearest: False
+first 25th selected_channels: [1, 2, 3, 4, 5]
+selected_distance_pairs are: [[470, 32.5418152139541], [418, 34.70795792296553], [469, 35.580340626465244]]
+test shape: (161, 1, 24, 7) (161, 1, 24, 7)
+test shape: (161, 24, 7) (161, 24, 7)
+mse:2.370882987976074, mae:0.9900172352790833
+Test - cost time: 12.734906435012817s
