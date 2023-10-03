@@ -1,11 +1,11 @@
 Args in experiment:
-Namespace(is_training=1, task_id='ili', model='Crossformer', data='custom', root_path='./dataset/illness/', data_path='national_illness.csv', features='M', target='OT', freq='h', checkpoints='./checkpoints/', seq_len=48, label_len=48, pred_len=24, enc_in=7, dec_in=7, c_out=7, d_model=256, n_heads=4, e_layers=3, d_layers=1, d_ff=512, moving_avg=[24], factor=1, distil=True, dropout=0.6, embed='timeF', activation='gelu', output_attention=False, do_predict=False, bucket_size=4, n_hashes=4, version='Fourier', mode_select='random', modes=64, L=3, base='legendre', cross_activation='tanh', K=1, min_lr=1e-30, warmup_epochs=3, std=0.2, smoothing_learning_rate=0, damping_learning_rate=0, optim='adam', seg_len=6, win_size=2, cross_factor=10, baseline=False, num_workers=10, itr=1, train_epochs=20, batch_size=32, patience=5, learning_rate=0.0005, des='Exp', loss='mse', lradj='type1', use_amp=False, use_gpu=True, gpu=0, use_multi_gpu=False, devices='0,1', test_train_num=200, adapted_lr_times=50.0, adapted_batch_size=1, test_train_epochs=1, run_train=False, run_test=False, run_test_batchsize1=False, run_adapt=False, run_calc=False, run_get_grads=False, run_get_lookback_data=False, run_select_with_distance=True, selected_data_num=5, get_grads_from='test', adapted_degree='small', lambda_reg=1, alpha=1, use_nearest_data=False, use_further_data=False, adapt_start_pos=1, run_calc_acf=False, acf_lag=1, run_calc_kldiv=False, get_data_error=False, adapt_part_channels=False, remove_distance=False, remove_cycle=False, remove_nearest=False, run_knn=False, feature_dim=50, k_value=10)
+Namespace(is_training=1, task_id='ili', model='Crossformer', data='custom', root_path='./dataset/illness/', data_path='national_illness.csv', features='M', target='OT', freq='h', checkpoints='./checkpoints/', seq_len=48, label_len=48, pred_len=24, enc_in=7, dec_in=7, c_out=7, d_model=256, n_heads=4, e_layers=3, d_layers=1, d_ff=512, moving_avg=[24], factor=1, distil=True, dropout=0.6, embed='timeF', activation='gelu', output_attention=False, do_predict=False, bucket_size=4, n_hashes=4, version='Fourier', mode_select='random', modes=64, L=3, base='legendre', cross_activation='tanh', K=1, min_lr=1e-30, warmup_epochs=3, std=0.2, smoothing_learning_rate=0, damping_learning_rate=0, optim='adam', seg_len=6, win_size=2, cross_factor=10, baseline=False, num_workers=10, itr=1, train_epochs=20, batch_size=32, patience=5, learning_rate=0.0005, des='Exp', loss='mse', lradj='type1', use_amp=False, use_gpu=True, gpu=0, use_multi_gpu=False, devices='0,1', test_train_num=200, adapted_lr_times=50.0, adapted_batch_size=1, test_train_epochs=1, run_train=False, run_test=False, run_test_batchsize1=False, run_adapt=False, run_calc=False, run_get_grads=False, run_get_lookback_data=False, run_select_with_distance=True, selected_data_num=5, lambda_period=0.1, get_grads_from='test', adapted_degree='small', lambda_reg=1, alpha=1, use_nearest_data=False, use_further_data=False, adapt_start_pos=1, run_calc_acf=False, acf_lag=1, run_calc_kldiv=False, get_data_error=False, adapt_part_channels=False, remove_distance=False, remove_cycle=False, remove_nearest=False, adapt_whole_model=False, draw_adapt_figure=False, run_knn=False, feature_dim=50, k_value=10)
 -------Start iteration 1--------------------------
 Use GPU: cuda:0
 >>>>>>>my testing with test-time training : ili_Crossformer_random_modes64_custom_ftM_sl48_ll48_pl24_dm256_nh4_el3_dl1_df512_fc1_ebtimeF_dtTrue_Exp_0<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 test 170
 loading model from checkpoint !!!
-	iters: 80, cost time: 21.39408540725708s
+	iters: 80, cost time: 13.663122415542603s
 []
 mse:2.7829031944274902, mae:1.116120457649231
 1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
@@ -15,7 +15,7 @@ adapt_part_channels: False
 remove_distance: False, remove_cycle: False, remove_nearest: False
 first 25th selected_channels: [1, 2, 3, 4, 5]
 selected_distance_pairs are: [[170, 12.111804695958815], [169, 13.311859191211036], [14, 14.776941596921242], [168, 15.097589955159728], [13, 15.587048202061405]]
-	iters: 90, cost time: 23.6191565990448s
+	iters: 90, cost time: 15.15232539176941s
 []
 mse:2.5313527584075928, mae:1.0579725503921509
 1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
@@ -25,7 +25,7 @@ adapt_part_channels: False
 remove_distance: False, remove_cycle: False, remove_nearest: False
 first 25th selected_channels: [1, 2, 3, 4, 5]
 selected_distance_pairs are: [[169, 16.057244917209413], [170, 16.39544350253394], [168, 17.254511722941032], [167, 19.2778013805801], [118, 21.020371631472443]]
-	iters: 100, cost time: 25.930798768997192s
+	iters: 100, cost time: 16.67043399810791s
 []
 mse:2.334059000015259, mae:1.0084705352783203
 1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
@@ -35,7 +35,7 @@ adapt_part_channels: False
 remove_distance: False, remove_cycle: False, remove_nearest: False
 first 25th selected_channels: [1, 2, 3, 4, 5]
 selected_distance_pairs are: [[169, 16.57332149191371], [170, 16.983114448845882], [168, 17.618019717871253], [167, 19.536664005947777], [118, 22.197906353232334]]
-	iters: 110, cost time: 27.943776607513428s
+	iters: 110, cost time: 18.255929231643677s
 []
 mse:2.2868919372558594, mae:0.99257493019104
 1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
@@ -45,7 +45,7 @@ adapt_part_channels: False
 remove_distance: False, remove_cycle: False, remove_nearest: False
 first 25th selected_channels: [1, 2, 3, 4, 5]
 selected_distance_pairs are: [[169, 16.713361447330698], [170, 17.197993131666657], [168, 17.709332912931803], [167, 19.572967183502012], [118, 23.30924011387092]]
-	iters: 120, cost time: 30.56589961051941s
+	iters: 120, cost time: 19.7784206867218s
 []
 mse:2.5351719856262207, mae:1.0636144876480103
 1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
@@ -55,7 +55,7 @@ adapt_part_channels: False
 remove_distance: False, remove_cycle: False, remove_nearest: False
 first 25th selected_channels: [1, 2, 3, 4, 5]
 selected_distance_pairs are: [[169, 17.055366087421437], [170, 17.311435518193843], [168, 18.075311605583796], [167, 19.93013401079453], [118, 23.79606215311414]]
-	iters: 130, cost time: 33.41950821876526s
+	iters: 130, cost time: 21.3013334274292s
 []
 mse:2.938950777053833, mae:1.1661456823349
 1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
@@ -65,7 +65,7 @@ adapt_part_channels: False
 remove_distance: False, remove_cycle: False, remove_nearest: False
 first 25th selected_channels: [1, 2, 3, 4, 5]
 selected_distance_pairs are: [[170, 23.760977131084694], [169, 25.3634214240476], [168, 27.306665890287398], [118, 28.940844509322805], [167, 29.30891434382732]]
-	iters: 140, cost time: 35.651268005371094s
+	iters: 140, cost time: 22.90842056274414s
 []
 mse:2.9090628623962402, mae:1.1709388494491577
 1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
@@ -75,7 +75,7 @@ adapt_part_channels: False
 remove_distance: False, remove_cycle: False, remove_nearest: False
 first 25th selected_channels: [1, 2, 3, 4, 5]
 selected_distance_pairs are: [[170, 29.93491926565736], [118, 32.47032312874077], [169, 32.642156473087354], [117, 34.613603061576114], [168, 34.77214552404776]]
-	iters: 150, cost time: 37.6870391368866s
+	iters: 150, cost time: 24.45315670967102s
 []
 mse:2.7914464473724365, mae:1.1513962745666504
 1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
@@ -85,7 +85,7 @@ adapt_part_channels: False
 remove_distance: False, remove_cycle: False, remove_nearest: False
 first 25th selected_channels: [1, 2, 3, 4, 5]
 selected_distance_pairs are: [[170, 31.621004897682383], [118, 32.77920264156952], [169, 34.73498054078469], [117, 34.95693397504937], [116, 37.23639238717874]]
-	iters: 160, cost time: 40.164605379104614s
+	iters: 160, cost time: 25.98177695274353s
 []
 mse:2.799060106277466, mae:1.1555781364440918
 1.before_adapt, 2.adapt_sample, 3.adapt_sample_after, 4.after_adapt, 5.angel_between_answer
@@ -98,4 +98,4 @@ selected_distance_pairs are: [[170, 32.0991828714972], [118, 33.5010318643912], 
 test shape: (161, 1, 24, 7) (161, 1, 24, 7)
 test shape: (161, 24, 7) (161, 24, 7)
 mse:2.8283772468566895, mae:1.1613004207611084
-Test - cost time: 40.53656363487244s
+Test - cost time: 26.207462549209595s
