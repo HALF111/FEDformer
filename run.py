@@ -92,6 +92,30 @@ def main():
     parser.add_argument('--win_size', type=int, default=2, help='window size for segment merge')
     parser.add_argument('--cross_factor', type=int, default=10, help='num of routers in Cross-Dimension Stage of TSA (c)')
     parser.add_argument('--baseline', action='store_true', help='whether to use mean of past series as baseline for prediction', default=False)
+    
+    # DLinear
+    parser.add_argument('--individual_DLinear', action='store_true', default=False, help='DLinear: a linear layer for each variate(channel) individually')
+    
+    # PatchTST
+    # 本文一共有3个dropout，分别为：dropout、fc_dropout、head_dropout
+    # fc_dropout是指最后一层如果是预训练层（会用一维卷积的预测头），对应的dropout
+    parser.add_argument('--fc_dropout', type=float, default=0.05, help='fully connected dropout')
+    # head_dropout是指最后一层如果是"展平+线性映射层"，对应的dropout
+    parser.add_argument('--head_dropout', type=float, default=0.0, help='head dropout')
+    parser.add_argument('--patch_len', type=int, default=16, help='patch length')
+    parser.add_argument('--stride', type=int, default=8, help='stride')
+    # 默认是需要做padding的！
+    parser.add_argument('--padding_patch', default='end', help='None: None; end: padding on the end')
+    # 默认是做RevIN的！！但RevIN的affine参数并不学习
+    parser.add_argument('--revin_PatchTST', type=int, default=1, help='RevIN; True 1 False 0')
+    parser.add_argument('--affine', type=int, default=0, help='RevIN-affine; True 1 False 0')
+    # RevIN默认减去均值（也可以像NLinear一样减掉最后一个值）
+    parser.add_argument('--subtract_last', type=int, default=0, help='0: subtract mean; 1: subtract last')
+    # 默认不做分解
+    parser.add_argument('--decomposition', type=int, default=0, help='decomposition; True 1 False 0')
+    parser.add_argument('--kernel_size', type=int, default=25, help='decomposition-kernel')
+    # 默认也是不使用独立的头！
+    parser.add_argument('--individual', type=int, default=0, help='individual head; True 1 False 0')
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
@@ -105,12 +129,21 @@ def main():
     # lradj == 'exponential_with_warmup' for ETSformer
     parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')
     parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
+    
+    # PatchTST
+    parser.add_argument('--pct_start', type=float, default=0.3, help='pct_start')
 
     # GPU
     parser.add_argument('--use_gpu', type=bool, default=True, help='use gpu')
     parser.add_argument('--gpu', type=int, default=0, help='gpu')
     parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus', default=False)
     parser.add_argument('--devices', type=str, default='0,1', help='device ids of multi gpus')
+    
+    # 默认是做RevIN的！！但RevIN的affine参数并不学习
+    parser.add_argument('--add_revin', action='store_true')  # whether to use RevIN
+    # parser.add_argument('--affine', type=int, default=0, help='RevIN-affine; True 1 False 0')
+    # # RevIN默认减去均值（也可以像NLinear一样减掉最后一个值）
+    # parser.add_argument('--subtract_last', type=int, default=0, help='0: subtract mean; 1: subtract last')
 
     # test_train_num
     parser.add_argument('--test_train_num', type=int, default=10, help='how many samples to be trained during test')
@@ -125,9 +158,13 @@ def main():
     parser.add_argument('--run_get_grads', action='store_true')
     parser.add_argument('--run_get_lookback_data', action='store_true')
     parser.add_argument('--run_select_with_distance', action='store_true')
+    parser.add_argument('--run_select_caching', action='store_true')
     # selected_data_num表示从过去test_train_num个样本中按照距离挑选出最小的多少个出来
     # 因此这里要求必须有lookback_data_num <= test_train_num成立
     parser.add_argument('--selected_data_num', type=int, default=10)
+    
+    # 获取all数据时候必须要用batch_size为1来遍历
+    parser.add_argument('--all_data_batch_size', type=int, default=1, help='the batch_size for getting all data')
     
     parser.add_argument('--lambda_period', type=float, default=0.1)
 
@@ -194,7 +231,7 @@ def main():
 
             # setting record of experiments
             # 别忘记加上test_train_num一项！！！
-            setting = '{}_{}_{}_modes{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}'.format(
+            setting = '{}_{}_{}_modes{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_revin{}_{}_{}'.format(
                 args.task_id,
                 args.model,
                 args.mode_select,
@@ -212,6 +249,7 @@ def main():
                 args.factor,
                 args.embed,
                 args.distil,
+                args.add_revin,
                 # args.test_train_num,
                 args.des,
                 ii)
@@ -281,16 +319,38 @@ def main():
                 print('>>>>>>>my testing with test-time training : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
                 mse, mae = exp.select_with_distance(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs)
                 
-                # # 存储mse和mae结果，便于读取
-                # result_dir = "./mse_and_mae_results"
-                # dataset_name = args.data_path.replace(".csv", "")
-                # file_name = f"{args.model}_{dataset_name}_pl{args.pred_len}_ttn{args.test_train_num}_select{args.selected_data_num}_lr{args.adapted_lr_times:.2f}.txt"
+                # 存储mse和mae结果，便于读取
+                result_dir = "./mse_and_mae_results"
+                dataset_name = args.data_path.replace(".csv", "")
+                if args.add_revin:
+                    file_name = f"RevIN_{args.model}_{dataset_name}_pl{args.pred_len}_ttn{args.test_train_num}_select{args.selected_data_num}_lr{args.adapted_lr_times:.2f}.txt"
+                else:
+                    file_name = f"{args.model}_{dataset_name}_pl{args.pred_len}_ttn{args.test_train_num}_select{args.selected_data_num}_lr{args.adapted_lr_times:.2f}.txt"
 
-                # if not os.path.exists(result_dir):
-                #     os.makedirs(result_dir)
-                # file_path = os.path.join(result_dir, file_name)
-                # with open(file_path, "w") as f:
-                #     f.write(f"{mse}, {mae}")
+                if not os.path.exists(result_dir):
+                    os.makedirs(result_dir)
+                file_path = os.path.join(result_dir, file_name)
+                with open(file_path, "w") as f:
+                    f.write(f"{mse}, {mae}")
+
+            if args.run_select_caching:
+                # 只对最后的全连接层projection层进行fine-tuning
+                print('>>>>>>>my testing with test-time training with caching : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+                mse, mae = exp.select_with_distance_caching(setting, test=1, is_training_part_params=True, use_adapted_model=True, test_train_epochs=args.test_train_epochs)
+                
+                # 存储mse和mae结果，便于读取
+                result_dir = "./mse_and_mae_results"
+                dataset_name = args.data_path.replace(".csv", "")
+                if args.add_revin:
+                    file_name = f"RevIN_{args.model}_{dataset_name}_pl{args.pred_len}_ttn{args.test_train_num}_select{args.selected_data_num}_lr{args.adapted_lr_times:.2f}.txt"
+                else:
+                    file_name = f"{args.model}_{dataset_name}_pl{args.pred_len}_ttn{args.test_train_num}_select{args.selected_data_num}_lr{args.adapted_lr_times:.2f}.txt"
+
+                if not os.path.exists(result_dir):
+                    os.makedirs(result_dir)
+                file_path = os.path.join(result_dir, file_name)
+                with open(file_path, "w") as f:
+                    f.write(f"{mse}, {mae}")
 
             if args.adapt_whole_model:
                 # 微调整个模型

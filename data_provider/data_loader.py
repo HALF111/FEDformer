@@ -26,8 +26,9 @@ class Dataset_ETT_hour(Dataset):
             self.label_len = size[1]
             self.pred_len = size[2]
         # init
-        assert flag in ['train', 'test', 'val']
-        type_map = {'train': 0, 'val': 1, 'test': 2}
+        # 加上'all'的flag
+        assert flag in ['train', 'test', 'val', 'all']
+        type_map = {'train': 0, 'val': 1, 'test': 2, 'all': 3}
         self.set_type = type_map[flag]
 
         self.features = features
@@ -47,8 +48,13 @@ class Dataset_ETT_hour(Dataset):
 
         border1s = [0, 12 * 30 * 24 - self.seq_len, 12 * 30 * 24 + 4 * 30 * 24 - self.seq_len]
         border2s = [12 * 30 * 24, 12 * 30 * 24 + 4 * 30 * 24, 12 * 30 * 24 + 8 * 30 * 24]
-        border1 = border1s[self.set_type]
-        border2 = border2s[self.set_type]
+        # deal with 'all'
+        if self.set_type == 3:
+            border1 = border1s[0]
+            border2 = border2s[-1]
+        else:
+            border1 = border1s[self.set_type]
+            border2 = border2s[self.set_type]
 
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
@@ -114,8 +120,9 @@ class Dataset_ETT_minute(Dataset):
             self.label_len = size[1]
             self.pred_len = size[2]
         # init
-        assert flag in ['train', 'test', 'val']
-        type_map = {'train': 0, 'val': 1, 'test': 2}
+        # add 'all'
+        assert flag in ['train', 'test', 'val', 'all']
+        type_map = {'train': 0, 'val': 1, 'test': 2, 'all': 3}
         self.set_type = type_map[flag]
 
         self.features = features
@@ -135,8 +142,12 @@ class Dataset_ETT_minute(Dataset):
 
         border1s = [0, 12 * 30 * 24 * 4 - self.seq_len, 12 * 30 * 24 * 4 + 4 * 30 * 24 * 4 - self.seq_len]
         border2s = [12 * 30 * 24 * 4, 12 * 30 * 24 * 4 + 4 * 30 * 24 * 4, 12 * 30 * 24 * 4 + 8 * 30 * 24 * 4]
-        border1 = border1s[self.set_type]
-        border2 = border2s[self.set_type]
+        if self.set_type == 3:
+            border1 = border1s[0]
+            border2 = border2s[-1]
+        else:
+            border1 = border1s[self.set_type]
+            border2 = border2s[self.set_type]
 
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
@@ -204,8 +215,8 @@ class Dataset_Custom(Dataset):
             self.label_len = size[1]
             self.pred_len = size[2]
         # init
-        assert flag in ['train', 'test', 'val']
-        type_map = {'train': 0, 'val': 1, 'test': 2}
+        assert flag in ['train', 'test', 'val', 'all']
+        type_map = {'train': 0, 'val': 1, 'test': 2, 'all': 3}
         self.set_type = type_map[flag]
 
         self.features = features
@@ -236,8 +247,12 @@ class Dataset_Custom(Dataset):
         num_vali = len(df_raw) - num_train - num_test
         border1s = [0, num_train - self.seq_len, len(df_raw) - num_test - self.seq_len]
         border2s = [num_train, num_train + num_vali, len(df_raw)]
-        border1 = border1s[self.set_type]
-        border2 = border2s[self.set_type]
+        if self.set_type == 3:
+            border1 = border1s[0]
+            border2 = border2s[-1]
+        else:
+            border1 = border1s[self.set_type]
+            border2 = border2s[self.set_type]
 
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
@@ -866,4 +881,5 @@ class Dataset_ETT_minute_Test(Dataset):
 
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
+
 

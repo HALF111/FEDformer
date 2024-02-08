@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from layers.Embed import DataEmbedding, DataEmbedding_wo_pos
 from layers.AutoCorrelation import AutoCorrelation, AutoCorrelationLayer
 from layers.Autoformer_EncDec import Encoder, Decoder, EncoderLayer, DecoderLayer, my_Layernorm, series_decomp
+from layers.RevIN import RevIN
 
 
 class Model(nn.Module):
@@ -22,6 +23,11 @@ class Model(nn.Module):
         self.label_len = configs.label_len
         self.pred_len = configs.pred_len
         self.output_attention = configs.output_attention
+        
+        # 加上RevIN模块
+        self.add_revin = configs.add_revin
+        if self.add_revin: 
+            self.revin_layer = RevIN(configs.enc_in, affine=configs.affine, subtract_last=configs.subtract_last)
 
         # Decomp
         kernel_size = configs.moving_avg
@@ -81,7 +87,12 @@ class Model(nn.Module):
         )
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
-                enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
+                enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None, return_mid_embedding=False):
+        # 输入维度为[batch_size, seq_len, channel]
+        # 加上RevIN
+        if self.add_revin:
+            x_enc = self.revin_layer(x_enc, 'norm')
+        
         # decomp init
         mean = torch.mean(x_enc, dim=1).unsqueeze(1).repeat(1, self.pred_len, 1)
         zeros = torch.zeros([x_dec.shape[0], self.pred_len, x_dec.shape[2]], device=x_enc.device)
@@ -94,12 +105,28 @@ class Model(nn.Module):
         enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
         # dec
         dec_out = self.dec_embedding(seasonal_init, x_mark_dec)
-        seasonal_part, trend_part = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask,
-                                                 trend=trend_init)
+        # seasonal_part, trend_part = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask,
+        #                                          trend=trend_init)
+        if return_mid_embedding:
+            seasonal_part, trend_part, mid_embedding = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask,
+                                                            trend=trend_init, return_mid_embedding=True)
+        else:
+            seasonal_part, trend_part = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask,
+                                                            trend=trend_init)
         # final
         dec_out = trend_part + seasonal_part
+        
+        # RevIN做denorm回来
+        if self.add_revin:
+            dec_out = self.revin_layer(dec_out, 'denorm')
 
         if self.output_attention:
             return dec_out[:, -self.pred_len:, :], attns
+        elif return_mid_embedding:
+            # 同时返回mid_embedding和trend_part两个部分
+            if self.add_revin:
+                return dec_out[:, -self.pred_len:, :], mid_embedding[:, -self.pred_len:, :], trend_part[:, -self.pred_len:, :], self.revin_layer.mean, self.revin_layer.stdev
+            else:
+                return dec_out[:, -self.pred_len:, :], mid_embedding[:, -self.pred_len:, :], trend_part[:, -self.pred_len:, :]
         else:
-            return dec_out[:, -self.pred_len:, :]
+            return dec_out[:, -self.pred_len:, :]  # [B, L, D]

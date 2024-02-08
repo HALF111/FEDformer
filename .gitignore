@@ -133,4 +133,13 @@ dmypy.json
 /dataset
 /results
 /test_results
+
 *.pth
+*.npy
+
+# /all_result
+# /all_mid_embeddings
+# /mse_and_mae_results
+# /distances_and_loss_diff
+
+/.tune*

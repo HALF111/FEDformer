@@ -35,14 +35,30 @@ def data_provider(args, flag):
     elif flag == "train_without_shuffle":
         flag = "train"
         shuffle_flag = False  # 为了做KNN的时候保持训练集中顺序，故而设成False
-        drop_last = True  # 设置成True还是False？
+        # drop_last = True  # 设置成True还是False？
+        drop_last = False  # 设置成True还是False？
         batch_size = args.batch_size
         freq=args.freq
     elif flag == "val_without_shuffle":
         flag = "val"
         shuffle_flag = False  # 为了做KNN的时候保持训练集中顺序，故而设成False
-        drop_last = True  # 设置成True还是False？
+        # drop_last = True  # 设置成True还是False？
+        drop_last = False  # 设置成True还是False？
         batch_size = args.batch_size
+        freq=args.freq
+    elif flag == "test_without_shuffle":
+        flag = "test"
+        shuffle_flag = False  # 为了做KNN的时候保持训练集中顺序，故而设成False
+        # drop_last = True  # 设置成True还是False？
+        drop_last = False  # 设置成True还是False？
+        batch_size = args.batch_size
+        freq=args.freq
+    elif flag == "all":
+        flag = "all"
+        shuffle_flag = False  # 为了做KNN的时候保持训练集中顺序，故而设成False
+        # drop_last = True  # 设置成True还是False？
+        drop_last = False  # 设置成True还是False？
+        batch_size = args.all_data_batch_size
         freq=args.freq
     elif flag == 'pred':
         shuffle_flag = False
@@ -83,7 +99,6 @@ def data_provider_at_test_time(args, flag):
         shuffle_flag = False
         # drop_last = False
         drop_last = True
-        batch_size = args.batch_size
         freq = args.freq
 
         # 注意：因为我们要做TTT/TTA，所以一定要把batch_size设置成1 ！！！
@@ -94,8 +109,8 @@ def data_provider_at_test_time(args, flag):
         # batch_size = 2857
     elif flag == "val":
         shuffle_flag = False
-        # drop_last = False
-        drop_last = True
+        drop_last = False
+        # drop_last = True
         freq = args.freq
 
         # 注意：因为我们要做TTT/TTA，所以一定要把batch_size设置成1 ！！！

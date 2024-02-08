@@ -162,7 +162,7 @@ def main(
                 --K {K}  --learning_rate {lr_ets}  \
                 --lradj exponential_with_warmup  --dropout 0.2  --activation 'sigmoid' \
                 --gpu {gpu}  --test_train_num {test_train_num}  --selected_data_num {selected_data_num} \
-                --adapted_lr_times {adapted_lr_times}  --adapt_cycle \
+                --adapted_lr_times {adapted_lr_times} \
                 --run_select_with_distance > {log_path}/ttn{test_train_num}_select{selected_data_num}_lr{adapted_lr_times:.2f}.log")
         elif model == "Crossformer":
             os.system(f"python -u ./run.py   --is_training 1   --root_path {root_path}   \
@@ -176,7 +176,7 @@ def main(
                 --learning_rate {lr_cross}  --d_model {d_model} --d_ff {d_ff} \
                 --dropout {dropout} \
                 --gpu {gpu}  --test_train_num {test_train_num}  --selected_data_num {selected_data_num} \
-                --adapted_lr_times {adapted_lr_times}  --adapt_cycle \
+                --adapted_lr_times {adapted_lr_times} \
                 --run_select_with_distance > {log_path}/ttn{test_train_num}_select{selected_data_num}_lr{adapted_lr_times:.2f}.log")
         else:
             os.system(f"python -u ./run.py   --is_training 1   --root_path {root_path}   \
@@ -187,7 +187,7 @@ def main(
                 --enc_in {variant_num}   --dec_in {variant_num}   \
                 --c_out {variant_num}   --des 'Exp'   --itr 1  --d_model 512  --train_epochs 1   \
                 --gpu {gpu}  --test_train_num {test_train_num}  --selected_data_num {selected_data_num} \
-                --adapted_lr_times {adapted_lr_times}  --adapt_cycle \
+                --adapted_lr_times {adapted_lr_times} \
                 --run_select_with_distance > {log_path}/ttn{test_train_num}_select{selected_data_num}_lr{adapted_lr_times:.2f}.log")
 
     # 将结果读出来

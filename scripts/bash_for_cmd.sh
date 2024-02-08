@@ -1,9 +1,22 @@
 # 1.1 ETTh1 & pred_len=96
 python -u run.py --is_training 1 --root_path ./dataset/ETT-small/ --data_path ETTh1.csv --task_id ETTh1 --model FEDformer --data ETTh1 --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --test_train_num 10
-python -u run.py --is_training 1 --root_path ./dataset/ETT-small/ --data_path ETTh1.csv --task_id ETTh1 --model FEDformer --data ETTh1 --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5 --adapt_cycle
+python -u run.py --is_training 1 --root_path ./dataset/ETT-small/ --data_path ETTh1.csv --task_id ETTh1 --model FEDformer --data ETTh1 --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5
 
-# 2.1 ETTm1 & pred_len=96
+# add_revin
+python -u run.py --is_training 1 --root_path ./dataset/ETT-small/ --data_path ETTh1.csv --task_id ETTh1 --model FEDformer --data ETTh1 --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --add_revin --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5
 
+# Linear
+python -u run.py --is_training 1 --root_path ./dataset/ETT-small/ --data_path ETTh1.csv --task_id ETTh1 --model Linear --data ETTh1 --features M --seq_len 336 --pred_len 96 --enc_in 7 --des 'Exp' --itr 1 --batch_size 32 --learning_rate 0.005 --gpu 0 --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5
+
+# 2.1 ETTh1
+# add_revin
+python -u run.py --is_training 1 --root_path ./dataset/ETT-small/ --data_path ETTh2.csv --task_id ETTh2 --model FEDformer --data ETTh2 --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --add_revin --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5
+
+# 3.1 ETTm1 & pred_len=96
+python -u run.py --is_training 1 --root_path ./dataset/ETT-small/ --data_path ETTm1.csv --task_id ETTm1 --model FEDformer --data ETTm1 --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --add_revin --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5
+
+# 4.1 ETTm2 & pred_len=96
+python -u run.py --is_training 1 --root_path ./dataset/ETT-small/ --data_path ETTm2.csv --task_id ETTm2 --model FEDformer --data ETTm2 --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --add_revin --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5
 
 # 5.1 Exchange & pred_len=96
 python -u run.py --is_training 1 --root_path ./dataset/exchange_rate/ --data_path exchange_rate.csv --task_id Exchange --model FEDformer --data custom --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 8 --dec_in 8 --c_out 8 --des 'Exp' --itr 1  --gpu 0 --test_train_num 10
@@ -11,6 +24,12 @@ python -u run.py --is_training 1 --root_path ./dataset/exchange_rate/ --data_pat
 
 # 6.1 Traffic & pred_len=96
 
+
+# 8.1 Weather
+python -u run.py --is_training 1 --root_path ./dataset/weather/ --data_path weather.csv --task_id weather --model FEDformer --data custom --features M --seq_len 96 --label_len 48 --pred_len 96 --e_layers 2 --d_layers 1 --factor 3 --enc_in 21 --dec_in 21 --c_out 21 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --add_revin --test_train_num 1000 --run_select_with_distance --selected_data_num 10 --adapted_lr_times 5
+
+# 9.1 Illness & pred_len=24
+python -u run.py --is_training 1 --root_path ./dataset/illness/ --data_path national_illness.csv --task_id ili --model FEDformer --data custom --features M --seq_len 36 --label_len 18 --pred_len 24 --e_layers 2 --d_layers 1 --factor 3 --enc_in 7 --dec_in 7 --c_out 7 --des 'Exp' --d_model 512 --itr 1  --gpu 0 --add_revin --test_train_num 200 --run_select_with_distance --selected_data_num 3 --adapted_lr_times 3
 
 
 # !Crossformer
